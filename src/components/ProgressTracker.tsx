@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { Chapter, Status } from "@/types/tracker";
@@ -59,6 +60,7 @@ interface ProgressTrackerProps {
 
 export const ProgressTracker = ({ initialChapters }: ProgressTrackerProps) => {
   const [chapters, setChapters] = useState<Chapter[]>(initialChapters);
+  const [classNumbers, setClassNumbers] = useState<Record<number, string>>({});
 
   const cycleStatus = (chapterId: number, activityIndex: number) => {
     const statusCycle: Status[] = ["", "Not Started", "In progress", "Done"];
@@ -78,6 +80,13 @@ export const ProgressTracker = ({ initialChapters }: ProgressTrackerProps) => {
         return chapter;
       })
     );
+  };
+
+  const handleClassNumberChange = (chapterId: number, value: string) => {
+    setClassNumbers((prev) => ({
+      ...prev,
+      [chapterId]: value,
+    }));
   };
 
   const getChapterProgress = (chapter: Chapter) => {
@@ -115,10 +124,21 @@ export const ProgressTracker = ({ initialChapters }: ProgressTrackerProps) => {
                     <div className="text-xs text-muted-foreground truncate" title={activity.name}>
                       {activity.name}
                     </div>
-                    <StatusBadge
-                      status={activity.status}
-                      onClick={() => cycleStatus(chapter.id, idx)}
-                    />
+                    {activity.name === "মোট ক্লাস" ? (
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={classNumbers[chapter.id] || ""}
+                        onChange={(e) => handleClassNumberChange(chapter.id, e.target.value)}
+                        className="h-7 w-full text-xs px-2"
+                      />
+                    ) : (
+                      <StatusBadge
+                        status={activity.status}
+                        onClick={() => cycleStatus(chapter.id, idx)}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
