@@ -102,7 +102,7 @@ export const ProgressTracker = ({ initialChapters }: ProgressTrackerProps) => {
 
   const getChapterProgress = (chapter: Chapter) => {
     const completedCount = chapter.activities.filter((a) => a.status === "Done").length;
-    const totalCount = chapter.activities.filter((a) => a.name !== "মোট ক্লাস").length;
+    const totalCount = chapter.activities.filter((a) => a.name !== "Total Lec").length;
     return Math.round((completedCount / totalCount) * 100);
   };
 
@@ -135,7 +135,7 @@ export const ProgressTracker = ({ initialChapters }: ProgressTrackerProps) => {
                     <div className="text-xs text-muted-foreground truncate" title={activity.name}>
                       {activity.name}
                     </div>
-                    {activity.name === "মোট ক্লাস" ? (
+                    {activity.name === "Total Lec" ? (
                       <Badge
                         variant="outline"
                         className="cursor-pointer hover:bg-muted gap-1 text-xs p-0 overflow-hidden"

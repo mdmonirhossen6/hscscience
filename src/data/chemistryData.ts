@@ -1,11 +1,11 @@
 import { SubjectData } from "@/types/tracker";
 
 const ACTIVITIES = [
-  "Class",
-  "মোট ক্লাস",
+  "Lecture",
+  "Total Lec",
   "ক",
   "খ",
-  "ক্লাস নোট",
+  "Notes",
   "MCQ Practice",
   "Typewise CQ",
   "CQ Summery",
