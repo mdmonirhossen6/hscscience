@@ -59,19 +59,42 @@ interface ProgressTrackerProps {
 }
 
 export const ProgressTracker = ({ initialChapters }: ProgressTrackerProps) => {
-  const [chapters, setChapters] = useState<Chapter[]>(initialChapters);
+  // Generate unique keys based on subject name from first chapter
+  const subjectKey = initialChapters[0]?.name || 'default';
+  const classNumbersStorageKey = `classNumbers-${subjectKey}`;
+  const statusStorageKey = `activityStatus-${subjectKey}`;
   
-  // Generate a unique key based on subject name from first chapter
-  const storageKey = `classNumbers-${initialChapters[0]?.name || 'default'}`;
+  const [chapters, setChapters] = useState<Chapter[]>(() => {
+    const saved = localStorage.getItem(statusStorageKey);
+    if (saved) {
+      const savedStatuses = JSON.parse(saved);
+      return initialChapters.map((chapter) => ({
+        ...chapter,
+        activities: chapter.activities.map((activity, idx) => ({
+          ...activity,
+          status: savedStatuses[chapter.id]?.[idx] ?? activity.status,
+        })),
+      }));
+    }
+    return initialChapters;
+  });
   
   const [classNumbers, setClassNumbers] = useState<Record<number, string>>(() => {
-    const saved = localStorage.getItem(storageKey);
+    const saved = localStorage.getItem(classNumbersStorageKey);
     return saved ? JSON.parse(saved) : {};
   });
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(classNumbers));
-  }, [classNumbers, storageKey]);
+    localStorage.setItem(classNumbersStorageKey, JSON.stringify(classNumbers));
+  }, [classNumbers, classNumbersStorageKey]);
+
+  useEffect(() => {
+    const statuses: Record<number, Status[]> = {};
+    chapters.forEach((chapter) => {
+      statuses[chapter.id] = chapter.activities.map((a) => a.status);
+    });
+    localStorage.setItem(statusStorageKey, JSON.stringify(statuses));
+  }, [chapters, statusStorageKey]);
 
   const cycleStatus = (chapterId: number, activityIndex: number) => {
     const statusCycle: Status[] = ["", "Not Started", "In progress", "Done"];
