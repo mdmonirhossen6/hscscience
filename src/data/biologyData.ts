@@ -1,16 +1,15 @@
 import { SubjectData } from "@/types/tracker";
 
 const ACTIVITIES = [
-  "Class",
-  "মোট ক্লাস",
+  "Lecture",
+  "Total Lec",
   "ক",
   "খ",
-  "ক্লাস নোট",
-  "MCQ Practice",
-  "Typewise CQ",
-  "CQ Summery",
-  "MCQ Summery",
-  "ALL Revision",
+  "Highlight Book",
+  "MCQ",
+  "CQ Types",
+  "Figure Notes",
+  "Revision",
 ];
 
 export const biologyData: SubjectData = {

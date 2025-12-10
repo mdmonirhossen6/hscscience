@@ -1,16 +1,14 @@
 import { SubjectData } from "@/types/tracker";
 
 const ACTIVITIES = [
-  "Class",
-  "মোট ক্লাস",
-  "ক",
-  "খ",
-  "ক্লাস নোট",
+  "Lecture",
+  "Total Lec",
+  "Notes",
   "MCQ Practice",
-  "Typewise CQ",
-  "CQ Summery",
-  "MCQ Summery",
-  "ALL Revision",
+  "CQ Types",
+  "CQ Summary",
+  "MCQ Summary",
+  "Revision",
 ];
 
 export const higherMathData: SubjectData = {
