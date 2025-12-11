@@ -26,16 +26,16 @@ export default function Tracker() {
       <nav className="border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-slate-100">HSC Study Tracker</h1>
+            <h1 className="text-2xl font-bold text-slate-100">Study Progress</h1>
             <div className="flex gap-4">
               <Link to="/">
-                <Button variant="ghost" className="text-slate-300 hover:text-slate-100">হোম</Button>
+                <Button variant="ghost" className="text-slate-300 hover:text-slate-100">Home</Button>
               </Link>
               <Link to="/tracker">
-                <Button variant="ghost" className="text-slate-300 hover:text-slate-100">ট্র্যাকার</Button>
+                <Button variant="ghost" className="text-slate-300 hover:text-slate-100">Tracker</Button>
               </Link>
               <Link to="/resources">
-                <Button variant="ghost" className="text-slate-300 hover:text-slate-100">রিসোর্স</Button>
+                <Button variant="ghost" className="text-slate-300 hover:text-slate-100">Resources</Button>
               </Link>
             </div>
           </div>
