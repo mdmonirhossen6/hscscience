@@ -6,7 +6,8 @@ const ACTIVITIES = [
   "Note Making",
   "CQ Practice",
   "MCQ Practice",
-  "Revision"
+  "Revision",
+  "Exam",
 ];
 
 export const ictData: SubjectData = {

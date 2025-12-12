@@ -11,6 +11,7 @@ const ACTIVITIES = [
   "CQ Summery",
   "MCQ Summery",
   "ALL Revision",
+  "Exam",
 ];
 
 export const chemistry2ndData: SubjectData = {

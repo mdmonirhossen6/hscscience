@@ -11,6 +11,7 @@ const ACTIVITIES = [
   "CQ Summery",
   "MCQ Summery",
   "ALL Revision",
+  "Exam",
 ];
 
 export const physicsData: SubjectData = {
@@ -37,6 +38,7 @@ export const physicsData: SubjectData = {
         { name: "CQ Summery", status: "Not Started" },
         { name: "MCQ Summery", status: "Not Started" },
         { name: "ALL Revision", status: "Not Started" },
+        { name: "Exam", status: "" },
       ],
     },
     {
@@ -53,6 +55,7 @@ export const physicsData: SubjectData = {
         { name: "CQ Summery", status: "Not Started" },
         { name: "MCQ Summery", status: "Not Started" },
         { name: "ALL Revision", status: "Not Started" },
+        { name: "Exam", status: "" },
       ],
     },
     {
@@ -69,6 +72,7 @@ export const physicsData: SubjectData = {
         { name: "CQ Summery", status: "" },
         { name: "MCQ Summery", status: "" },
         { name: "ALL Revision", status: "" },
+        { name: "Exam", status: "" },
       ],
     },
     {
