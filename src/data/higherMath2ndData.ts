@@ -9,6 +9,7 @@ const ACTIVITIES = [
   "CQ Summary",
   "MCQ Summary",
   "Revision",
+  "Exam",
 ];
 
 export const higherMath2ndData: SubjectData = {

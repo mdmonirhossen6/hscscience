@@ -10,6 +10,7 @@ const ACTIVITIES = [
   "CQ Types",
   "Figure Notes",
   "Revision",
+  "Exam",
 ];
 
 export const biology2ndData: SubjectData = {
