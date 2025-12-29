@@ -271,5 +271,5 @@ export async function generateMonthlyProgressPDF(
     </div>
   `;
 
-  await savePDF(container, `hsc-monthly-progress-${format(new Date(), "yyyy-MM")}.pdf`);
+  await saveSinglePagePDF(container, `hsc-monthly-progress-${format(new Date(), "yyyy-MM")}.pdf`);
 }
