@@ -16,6 +16,9 @@ import { useState, useEffect } from "react";
 import { MonthlySummary } from "@/components/MonthlySummary";
 import { MobileHeader } from "@/components/MobileHeader";
 import { BottomNav } from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { generateOverallProgressPDF } from "@/lib/pdfGenerator";
 
 interface SubjectProgress {
   name: string;
@@ -97,11 +100,31 @@ export default function Home() {
     fetchProgress();
   }, [user]);
 
+  const handleDownloadOverallPDF = () => {
+    if (!user?.email) return;
+    generateOverallProgressPDF(user.email, overallProgress, subjectProgresses);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
       <MobileHeader title="Study Progress" />
 
       <main className="px-4 py-6 max-w-4xl mx-auto">
+        {/* Desktop Download Button */}
+        {user && (
+          <div className="hidden md:flex justify-end mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadOverallPDF}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download Overall Progress (PDF)
+            </Button>
+          </div>
+        )}
+
         {/* Monthly Summary */}
         {user && (
           <div className="mb-6">
@@ -185,6 +208,21 @@ export default function Home() {
           </Link>
         </div>
       </main>
+
+      {/* Mobile Download Button - Sticky */}
+      {user && (
+        <div className="fixed bottom-16 left-0 right-0 px-4 py-2 bg-background/95 backdrop-blur-sm border-t border-border md:hidden z-40">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadOverallPDF}
+            className="w-full gap-2 h-11"
+          >
+            <Download className="h-4 w-4" />
+            Download Overall Progress (PDF)
+          </Button>
+        </div>
+      )}
 
       <BottomNav />
     </div>

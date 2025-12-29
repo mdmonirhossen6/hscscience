@@ -3,16 +3,24 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Calendar, ChevronRight, CheckCircle2, Download } from "lucide-react";
 import { useChapterCompletions } from "@/hooks/useChapterCompletions";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { generateMonthlyProgressPDF } from "@/lib/pdfGenerator";
 
 export const MonthlySummary = () => {
   const { getMonthlyCompletions, loading } = useChapterCompletions();
+  const { user } = useAuth();
   const [showDetails, setShowDetails] = useState(false);
 
   const monthlyCompletions = getMonthlyCompletions();
   const currentMonth = format(new Date(), "MMMM yyyy");
+
+  const handleDownloadMonthlyPDF = () => {
+    if (!user?.email) return;
+    generateMonthlyProgressPDF(user.email, currentMonth, monthlyCompletions);
+  };
 
   // Group by subject
   const bySubject = monthlyCompletions.reduce((acc, c) => {
@@ -34,39 +42,53 @@ export const MonthlySummary = () => {
   return (
     <>
       <Card className="p-6 bg-card border-border hover:shadow-md transition-shadow">
-        <div className="flex items-start justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span className="text-sm font-medium">{currentMonth}</span>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-foreground">
-                {monthlyCompletions.length}
+        <div className="space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span className="text-sm font-medium">{currentMonth}</span>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Chapters Completed
-              </p>
-            </div>
-            {Object.keys(bySubject).length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {Object.entries(bySubject).map(([subject, count]) => (
-                  <Badge key={subject} variant="secondary" className="text-xs">
-                    {subject}: {count}
-                  </Badge>
-                ))}
+              <div>
+                <div className="text-3xl font-bold text-foreground">
+                  {monthlyCompletions.length}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Chapters Completed
+                </p>
               </div>
-            )}
+              {Object.keys(bySubject).length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {Object.entries(bySubject).map(([subject, count]) => (
+                    <Badge key={subject} variant="secondary" className="text-xs">
+                      {subject}: {count}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDetails(true)}
+              disabled={monthlyCompletions.length === 0}
+              className="text-primary hover:text-primary/80"
+            >
+              View Details
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
           </div>
+          
+          {/* Download Monthly PDF Button */}
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            onClick={() => setShowDetails(true)}
+            onClick={handleDownloadMonthlyPDF}
             disabled={monthlyCompletions.length === 0}
-            className="text-primary hover:text-primary/80"
+            className="w-full gap-2 h-10"
           >
-            View Details
-            <ChevronRight className="h-4 w-4 ml-1" />
+            <Download className="h-4 w-4" />
+            Download Monthly Progress (PDF)
           </Button>
         </div>
       </Card>
