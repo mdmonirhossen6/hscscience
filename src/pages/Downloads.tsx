@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 import { MobileHeader } from "@/components/MobileHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Download, FileText, ClipboardList } from "lucide-react";
+import { Download, FileText, ClipboardList, ExternalLink, Send } from "lucide-react";
 import { generateOverallProgressPDF, generateDetailedProgressPDF } from "@/lib/pdfGenerator";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -208,6 +208,49 @@ export default function Downloads() {
                   </Button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Links Section */}
+        <div className="mt-8 space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground px-1">🔗 Quick Links</h3>
+          
+          <Card className="border-border/50 bg-card/60">
+            <CardContent className="p-4">
+              <a 
+                href="https://trackinger.lovable.app" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-foreground hover:text-primary transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <ExternalLink className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">Trackinger</p>
+                  <p className="text-xs text-muted-foreground">trackinger.lovable.app</p>
+                </div>
+              </a>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-card/60">
+            <CardContent className="p-4">
+              <a 
+                href="https://t.me/trackingerapp" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-foreground hover:text-primary transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-[hsl(200_100%_50%)]/10 text-[hsl(200_100%_50%)]">
+                  <Send className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">Telegram Group</p>
+                  <p className="text-xs text-muted-foreground">t.me/trackingerapp</p>
+                </div>
+              </a>
             </CardContent>
           </Card>
         </div>
