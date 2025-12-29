@@ -4,9 +4,9 @@ import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Mail, Lock, Loader2 } from "lucide-react";
+import { BottomNav } from "@/components/BottomNav";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -34,7 +34,6 @@ export default function Auth() {
     e.preventDefault();
     setErrors({});
 
-    // Validate inputs
     const result = authSchema.safeParse({ email, password });
     if (!result.success) {
       const fieldErrors: { email?: string; password?: string } = {};
@@ -88,63 +87,68 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-card border-border">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-full bg-primary/10">
+    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Logo */}
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
               <BookOpen className="w-8 h-8 text-primary" />
             </div>
+            <h1 className="text-2xl font-bold text-foreground">
+              {isLogin ? "Welcome Back" : "Create Account"}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">
+              {isLogin
+                ? "Sign in to track your study progress"
+                : "Sign up to start tracking your studies"}
+            </p>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
-            {isLogin ? "Welcome Back" : "Create Account"}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {isLogin
-              ? "Sign in to track your study progress"
-              : "Sign up to start tracking your studies"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="email"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="h-12 pl-12 text-base"
                   disabled={loading}
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
+                <p className="text-sm text-destructive px-1">{errors.email}</p>
               )}
             </div>
 
             <div className="space-y-2">
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="password"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="h-12 pl-12 text-base"
                   disabled={loading}
                 />
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
+                <p className="text-sm text-destructive px-1">{errors.password}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-medium" 
+              disabled={loading}
+            >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   {isLogin ? "Signing in..." : "Creating account..."}
                 </>
               ) : isLogin ? (
@@ -155,11 +159,12 @@ export default function Auth() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          {/* Toggle */}
+          <div className="text-center">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary font-medium min-h-[44px] px-4"
               disabled={loading}
             >
               {isLogin
@@ -167,8 +172,10 @@ export default function Auth() {
                 : "Already have an account? Sign in"}
             </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <BottomNav />
     </div>
   );
 }
