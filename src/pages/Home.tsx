@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@/components/CircularProgress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,8 +13,9 @@ import { biologyData } from "@/data/biologyData";
 import { biology2ndData } from "@/data/biology2ndData";
 import { ictData } from "@/data/ictData";
 import { useState, useEffect } from "react";
-import { LogIn, LogOut } from "lucide-react";
 import { MonthlySummary } from "@/components/MonthlySummary";
+import { MobileHeader } from "@/components/MobileHeader";
+import { BottomNav } from "@/components/BottomNav";
 
 interface SubjectProgress {
   name: string;
@@ -25,8 +25,7 @@ interface SubjectProgress {
 }
 
 export default function Home() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [overallProgress, setOverallProgress] = useState(0);
   const [subjectProgresses, setSubjectProgresses] = useState<SubjectProgress[]>([]);
 
@@ -50,7 +49,6 @@ export default function Home() {
         { data: ictData, color: "hsl(199 89% 48%)", displayName: "ICT" },
       ];
 
-      // Fetch all records for the user
       const { data: records } = await supabase
         .from("study_records")
         .select("*")
@@ -99,79 +97,47 @@ export default function Home() {
     fetchProgress();
   }, [user]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Study Progress</h1>
-            <div className="flex gap-4 items-center">
-              <Link to="/">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Home</Button>
-              </Link>
-              <Link to="/tracker">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Tracker</Button>
-              </Link>
-              <Link to="/resources">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground">Resources</Button>
-              </Link>
-              {!loading && (
-                user ? (
-                  <Button variant="outline" size="sm" onClick={handleSignOut}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </Button>
-                ) : (
-                  <Link to="/auth">
-                    <Button variant="default" size="sm">
-                      <LogIn className="h-4 w-4 mr-2" />
-                      Sign In
-                    </Button>
-                  </Link>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <MobileHeader title="Study Progress" />
 
-      <main className="container mx-auto px-4 py-16">
+      <main className="px-4 py-6 max-w-4xl mx-auto">
         {/* Monthly Summary */}
         {user && (
-          <div className="mb-8 max-w-md mx-auto">
+          <div className="mb-6">
             <MonthlySummary />
           </div>
         )}
 
-        {/* Overall Progress Widget */}
-        <div className="flex flex-col items-center gap-8 mb-12">
-          <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
-            <CircularProgress percentage={overallProgress} />
+        {/* Overall Progress - Centered on mobile */}
+        <div className="flex flex-col items-center gap-6 mb-8">
+          <div className="bg-card/50 rounded-2xl p-6 md:p-8">
+            <CircularProgress percentage={overallProgress} size={140} />
           </div>
-          
-          {/* Individual Subject Progress */}
-          <TooltipProvider>
-            <div className="flex flex-wrap justify-center gap-4">
+        </div>
+
+        {/* Subject Grid - Horizontal scroll on mobile, grid on desktop */}
+        <div className="mb-8">
+          <h2 className="text-base font-semibold text-foreground mb-4 px-1">
+            Subject Progress
+          </h2>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth-touch pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-5 md:overflow-visible">
+            <TooltipProvider>
               {subjectProgresses.map((subject, index) => (
                 <Tooltip key={subject.name}>
                   <TooltipTrigger asChild>
                     <Link 
                       to={`/tracker?tab=${index}`}
-                      className="bg-card border border-border rounded-xl p-4 flex flex-col items-center gap-2 min-w-[120px] hover:border-primary/50 hover:bg-card/80 transition-all cursor-pointer"
+                      className="flex-shrink-0 w-[100px] md:w-auto bg-card/60 rounded-xl p-4 flex flex-col items-center gap-2 active:scale-[0.97] transition-transform"
                     >
-                      <div className="relative w-16 h-16">
+                      <div className="relative w-14 h-14 md:w-16 md:h-16">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                           <circle
                             cx="18"
                             cy="18"
                             r="15.5"
                             fill="none"
-                            className="stroke-muted"
+                            className="stroke-muted/30"
                             strokeWidth="3"
                           />
                           <circle
@@ -189,7 +155,7 @@ export default function Home() {
                           {subject.progress}%
                         </span>
                       </div>
-                      <span className="text-xs text-muted-foreground text-center leading-tight">
+                      <span className="text-[11px] text-muted-foreground text-center leading-tight whitespace-nowrap">
                         {subject.name}
                       </span>
                     </Link>
@@ -199,20 +165,28 @@ export default function Home() {
                   </TooltipContent>
                 </Tooltip>
               ))}
-            </div>
-          </TooltipProvider>
+            </TooltipProvider>
+          </div>
         </div>
 
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-foreground mb-4">
-            Study Progress
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Track your progress across all 9 subjects (1st and 2nd papers)
-          </p>
+        {/* Quick Actions */}
+        <div className="space-y-3">
+          <Link 
+            to="/tracker" 
+            className="touch-button w-full bg-primary text-primary-foreground"
+          >
+            Start Studying
+          </Link>
+          <Link 
+            to="/resources" 
+            className="touch-button w-full bg-card text-foreground border border-border"
+          >
+            View Study Tips
+          </Link>
         </div>
-
       </main>
+
+      <BottomNav />
     </div>
   );
 }

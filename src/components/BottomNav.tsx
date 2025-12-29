@@ -1,0 +1,48 @@
+import { Link, useLocation } from "react-router-dom";
+import { Home, BookOpen, Lightbulb, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+
+const navItems = [
+  { path: "/", icon: Home, label: "Home" },
+  { path: "/tracker", icon: BookOpen, label: "Study" },
+  { path: "/resources", icon: Lightbulb, label: "Tips" },
+];
+
+export function BottomNav() {
+  const location = useLocation();
+  const { user } = useAuth();
+
+  return (
+    <nav className="bottom-nav md:hidden">
+      <div className="flex items-stretch">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "bottom-nav-item",
+                isActive && "active"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
+        <Link
+          to={user ? "/" : "/auth"}
+          className={cn(
+            "bottom-nav-item",
+            location.pathname === "/auth" && "active"
+          )}
+        >
+          <User className="h-5 w-5" />
+          <span className="text-[10px] font-medium">{user ? "Profile" : "Login"}</span>
+        </Link>
+      </div>
+    </nav>
+  );
+}

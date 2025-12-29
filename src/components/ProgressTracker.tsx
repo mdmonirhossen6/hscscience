@@ -1,43 +1,64 @@
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Clock, Loader2, LinkIcon, ExternalLink, CheckSquare, Square } from "lucide-react";
+import { 
+  CheckCircle2, 
+  Circle, 
+  Clock, 
+  Loader2, 
+  LinkIcon, 
+  ExternalLink, 
+  CheckSquare, 
+  Square,
+  ChevronDown,
+  ChevronUp 
+} from "lucide-react";
 import { Chapter, Status } from "@/types/tracker";
 import { useStudyRecords } from "@/hooks/useStudyRecords";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChapterResources } from "@/hooks/useChapterResources";
 import { useChapterCompletions } from "@/hooks/useChapterCompletions";
 import { ResourceModal } from "@/components/ResourceModal";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-const StatusBadge = ({ status, onClick, disabled }: { status: Status; onClick: () => void; disabled?: boolean }) => {
+const StatusButton = ({ 
+  status, 
+  activityName,
+  onClick, 
+  disabled 
+}: { 
+  status: Status; 
+  activityName: string;
+  onClick: () => void; 
+  disabled?: boolean;
+}) => {
   const getStatusConfig = (s: Status) => {
     switch (s) {
       case "Done":
         return {
           icon: CheckCircle2,
-          variant: "default" as const,
-          className: "bg-success text-success-foreground hover:bg-success/90",
+          className: "status-done",
         };
       case "In progress":
         return {
           icon: Clock,
-          variant: "secondary" as const,
-          className: "bg-warning text-warning-foreground hover:bg-warning/90",
+          className: "status-progress",
         };
       case "Not Started":
         return {
           icon: Circle,
-          variant: "outline" as const,
-          className: "hover:bg-muted",
+          className: "status-pending",
         };
       default:
         return {
           icon: Circle,
-          variant: "outline" as const,
-          className: "opacity-30 hover:opacity-60",
+          className: "bg-muted/50 text-muted-foreground/50",
         };
     }
   };
@@ -46,18 +67,17 @@ const StatusBadge = ({ status, onClick, disabled }: { status: Status; onClick: (
   const Icon = config.icon;
 
   return (
-    <Badge
-      variant={config.variant}
+    <button
       className={cn(
-        "cursor-pointer transition-all duration-200 hover:scale-105 gap-1 text-xs",
+        "activity-button w-full",
         config.className,
-        disabled && "opacity-50 cursor-not-allowed"
+        disabled && "opacity-50 pointer-events-none"
       )}
       onClick={disabled ? undefined : onClick}
     >
-      <Icon className="h-3 w-3" />
-      {status || "—"}
-    </Badge>
+      <Icon className="h-4 w-4 flex-shrink-0" />
+      <span className="truncate">{activityName}</span>
+    </button>
   );
 };
 
@@ -72,14 +92,13 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
   const { getResource, saveResource, deleteResource, loading: resourcesLoading } = useChapterResources(subjectId);
   const { isChapterCompleted, markChapterCompleted, loading: completionsLoading } = useChapterCompletions();
   
-  // Local state for optimistic updates
   const [localStatuses, setLocalStatuses] = useState<Record<string, Status>>({});
   const [localClassNumbers, setLocalClassNumbers] = useState<Record<string, string>>({});
+  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   
-  // Resource modal state
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
-  // Sync local state with database records
+
   useEffect(() => {
     const statuses: Record<string, Status> = {};
     const classNumbers: Record<string, string> = {};
@@ -109,20 +128,13 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
     const nextIndex = (currentIndex + 1) % statusCycle.length;
     const newStatus = statusCycle[nextIndex];
     
-    // Optimistic update
     setLocalStatuses((prev) => ({ ...prev, [key]: newStatus }));
-    
-    // Save to database
     await saveStatus(chapterName, activityName, newStatus);
   };
 
   const handleClassNumberChange = async (chapterName: string, value: string) => {
     if (!user) return;
-    
-    // Optimistic update
     setLocalClassNumbers((prev) => ({ ...prev, [chapterName]: value }));
-    
-    // Save to database
     const numValue = value === "" ? null : parseInt(value, 10);
     await saveClassNumber(chapterName, numValue);
   };
@@ -141,7 +153,19 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
       }
     });
     
-    return totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    return { completedCount, totalCount, percentage: totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0 };
+  };
+
+  const toggleChapter = (chapterName: string) => {
+    setExpandedChapters(prev => {
+      const next = new Set(prev);
+      if (next.has(chapterName)) {
+        next.delete(chapterName);
+      } else {
+        next.add(chapterName);
+      }
+      return next;
+    });
   };
 
   if (!user) {
@@ -174,114 +198,140 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {initialChapters.map((chapter) => {
-          const progress = getChapterProgress(chapter);
+          const { completedCount, totalCount, percentage } = getChapterProgress(chapter);
           const resource = getResource(subjectId, chapter.name);
           const completed = isChapterCompleted(subjectId, chapter.name);
+          const isExpanded = expandedChapters.has(chapter.name);
           
           return (
-            <Card
-              key={chapter.id}
-              className={cn(
-                "p-6 hover:shadow-md transition-shadow duration-300 bg-card border-border",
-                completed && "border-success/50 bg-success/5"
-              )}
+            <Collapsible 
+              key={chapter.id} 
+              open={isExpanded} 
+              onOpenChange={() => toggleChapter(chapter.name)}
             >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 flex-shrink-0"
-                      onClick={() => handleToggleComplete(chapter.name)}
-                      title={completed ? "Mark as incomplete" : "Mark as complete"}
+              <div
+                className={cn(
+                  "bg-card/60 rounded-xl overflow-hidden transition-all",
+                  completed && "bg-success/10 ring-1 ring-success/30"
+                )}
+              >
+                {/* Chapter Header */}
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center gap-3 p-4 min-h-[64px]">
+                    {/* Complete checkbox */}
+                    <button
+                      className="flex-shrink-0 p-1 -m-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleComplete(chapter.name);
+                      }}
                     >
                       {completed ? (
-                        <CheckSquare className="h-5 w-5 text-success" />
+                        <CheckSquare className="h-6 w-6 text-success" />
                       ) : (
-                        <Square className="h-5 w-5 text-muted-foreground" />
+                        <Square className="h-6 w-6 text-muted-foreground" />
                       )}
-                    </Button>
-                    <h3 className={cn(
-                      "text-lg font-semibold text-foreground truncate",
-                      completed && "line-through text-muted-foreground"
-                    )}>
-                      {chapter.name}
-                    </h3>
-                    {resource && (
-                      <Badge variant="secondary" className="gap-1 text-xs flex-shrink-0">
-                        <LinkIcon className="h-3 w-3" />
-                        <a
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {resource.title}
-                        </a>
-                        <ExternalLink className="h-3 w-3" />
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openResourceModal(chapter.name)}
-                      className="text-xs"
-                    >
-                      <LinkIcon className="h-3 w-3 mr-1" />
-                      Resource
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm text-muted-foreground">{progress}%</div>
-                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500"
-                          style={{ width: `${progress}%` }}
-                        />
+                    </button>
+                    
+                    {/* Chapter info */}
+                    <div className="flex-1 min-w-0 text-left">
+                      <h3 className={cn(
+                        "font-medium text-foreground truncate text-base",
+                        completed && "line-through text-muted-foreground"
+                      )}>
+                        {chapter.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">
+                          {completedCount}/{totalCount}
+                        </span>
+                        <div className="flex-1 max-w-[80px] h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary transition-all"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground">{percentage}%</span>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-2">
-                  {chapter.activities.map((activity, idx) => {
-                    const key = `${chapter.name}-${activity.name}`;
-                    return (
-                      <div key={idx} className="space-y-1">
-                        <div className="text-xs text-muted-foreground truncate" title={activity.name}>
-                          {activity.name}
-                        </div>
-                        {activity.name === "Total Lec" ? (
-                          <Badge
-                            variant="outline"
-                            className="cursor-pointer hover:bg-muted gap-1 text-xs p-0 overflow-hidden"
-                          >
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="—"
-                              value={localClassNumbers[chapter.name] || ""}
-                              onChange={(e) => handleClassNumberChange(chapter.name, e.target.value)}
-                              className="h-6 w-12 text-xs text-center border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            />
-                          </Badge>
-                        ) : (
-                          <StatusBadge
+                    {/* Resource badge */}
+                    {resource && (
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 p-2 -m-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ExternalLink className="h-5 w-5 text-accent" />
+                      </a>
+                    )}
+                    
+                    {/* Expand icon */}
+                    <div className="flex-shrink-0">
+                      {isExpanded ? (
+                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                  </div>
+                </CollapsibleTrigger>
+
+                {/* Expanded Content */}
+                <CollapsibleContent>
+                  <div className="px-4 pb-4 space-y-4">
+                    {/* Activity Grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {chapter.activities.map((activity, idx) => {
+                        const key = `${chapter.name}-${activity.name}`;
+                        
+                        if (activity.name === "Total Lec") {
+                          return (
+                            <div key={idx} className="col-span-2 flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                              <span className="text-sm text-muted-foreground">Total Lectures:</span>
+                              <Input
+                                type="number"
+                                min="0"
+                                placeholder="0"
+                                value={localClassNumbers[chapter.name] || ""}
+                                onChange={(e) => handleClassNumberChange(chapter.name, e.target.value)}
+                                className="h-9 w-20 text-sm text-center bg-background [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <StatusButton
+                            key={idx}
                             status={localStatuses[key] || ""}
+                            activityName={activity.name}
                             onClick={() => cycleStatus(chapter.name, activity.name)}
                           />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-border/50">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openResourceModal(chapter.name)}
+                        className="flex-1 min-h-[40px]"
+                      >
+                        <LinkIcon className="h-4 w-4 mr-1.5" />
+                        {resource ? "Edit Resource" : "Add Resource"}
+                      </Button>
+                    </div>
+                  </div>
+                </CollapsibleContent>
               </div>
-            </Card>
+            </Collapsible>
           );
         })}
       </div>
