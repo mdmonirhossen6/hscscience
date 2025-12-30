@@ -18,34 +18,32 @@ export interface SubjectConfig {
 }
 
 // Physics / Chemistry / Biology / ICT
-// Core Study: 40% | MCQ: 25% | CQ: 35% (scaled from 50% internal)
+// Core Study: 30% | MCQ: 20% | CQ: 50% = 100% total (no scaling needed)
 export const scienceConfig: SubjectConfig = {
   sections: {
     core: {
-      max: 40,
+      max: 30,
       activities: {
-        "Lecture": 20,
-        "Notes": 20,
+        "Lecture": 15,
+        "Notes": 15,
       },
     },
     mcq: {
-      max: 25,
+      max: 20,
       activities: {
         "MCQ Practice": 15,
-        "MCQ Summary": 10,
+        "MCQ Summary": 5,
       },
     },
     cq: {
-      max: 35,
-      internalMax: 55, // Internal activities total 55% (5+10+10+25+3+2), scaled to max 35%
+      max: 50,
       activities: {
         "ক": 5,
         "খ": 10,
-        "CQ Summary": 10,
-        "Written CQ": 25,
-        // Final layer activities included in CQ section
-        "Revision": 3,
-        "Exam": 2,
+        "CQ Summary": 5,
+        "Written CQ": 20,
+        "Revision": 5,
+        "Exam": 5,
       },
     },
   },
