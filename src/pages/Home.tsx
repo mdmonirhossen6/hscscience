@@ -12,8 +12,7 @@ import { higherMath2ndData } from "@/data/higherMath2ndData";
 import { biologyData } from "@/data/biologyData";
 import { biology2ndData } from "@/data/biology2ndData";
 import { ictData } from "@/data/ictData";
-import { english1stReadingData } from "@/data/english1stReadingData";
-import { english1stWritingData } from "@/data/english1stWritingData";
+import { english1stData } from "@/data/english1stData";
 import { english2ndData } from "@/data/english2ndData";
 import { useState, useEffect } from "react";
 import { MonthlySummary } from "@/components/MonthlySummary";
@@ -54,8 +53,7 @@ export default function Home() {
         { data: biologyData, color: "hsl(25 95% 53%)", displayName: "Biology 1st" },
         { data: biology2ndData, color: "hsl(25 90% 63%)", displayName: "Biology 2nd" },
         { data: ictData, color: "hsl(199 89% 48%)", displayName: "ICT" },
-        { data: english1stReadingData, color: "hsl(340 82% 52%)", displayName: "Eng Reading" },
-        { data: english1stWritingData, color: "hsl(340 75% 62%)", displayName: "Eng Writing" },
+        { data: english1stData, color: "hsl(340 82% 52%)", displayName: "English 1st" },
         { data: english2ndData, color: "hsl(280 70% 55%)", displayName: "English 2nd" },
       ];
 
@@ -126,8 +124,7 @@ export default function Home() {
       { data: biologyData, displayName: "Biology 1st" },
       { data: biology2ndData, displayName: "Biology 2nd" },
       { data: ictData, displayName: "ICT" },
-      { data: english1stReadingData, displayName: "Eng Reading" },
-      { data: english1stWritingData, displayName: "Eng Writing" },
+      { data: english1stData, displayName: "English 1st" },
       { data: english2ndData, displayName: "English 2nd" },
     ];
 

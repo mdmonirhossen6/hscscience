@@ -17,8 +17,7 @@ import { higherMath2ndData } from "@/data/higherMath2ndData";
 import { biologyData } from "@/data/biologyData";
 import { biology2ndData } from "@/data/biology2ndData";
 import { ictData } from "@/data/ictData";
-import { english1stReadingData } from "@/data/english1stReadingData";
-import { english1stWritingData } from "@/data/english1stWritingData";
+import { english1stData } from "@/data/english1stData";
 import { english2ndData } from "@/data/english2ndData";
 
 const allSubjects = [
@@ -31,8 +30,7 @@ const allSubjects = [
   { data: biologyData, label: "Biology 1st", short: "Bio 1", color: "hsl(25 95% 53%)" },
   { data: biology2ndData, label: "Biology 2nd", short: "Bio 2", color: "hsl(25 90% 63%)" },
   { data: ictData, label: "ICT", short: "ICT", color: "hsl(199 89% 48%)" },
-  { data: english1stReadingData, label: "Eng 1st Reading", short: "Eng R", color: "hsl(340 82% 52%)" },
-  { data: english1stWritingData, label: "Eng 1st Writing", short: "Eng W", color: "hsl(340 75% 62%)" },
+  { data: english1stData, label: "English 1st", short: "Eng 1", color: "hsl(340 82% 52%)" },
   { data: english2ndData, label: "English 2nd", short: "Eng 2", color: "hsl(280 70% 55%)" },
 ];
 

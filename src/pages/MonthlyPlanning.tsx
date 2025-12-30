@@ -26,8 +26,7 @@ import { higherMath2ndData } from "@/data/higherMath2ndData";
 import { biologyData } from "@/data/biologyData";
 import { biology2ndData } from "@/data/biology2ndData";
 import { ictData } from "@/data/ictData";
-import { english1stReadingData } from "@/data/english1stReadingData";
-import { english1stWritingData } from "@/data/english1stWritingData";
+import { english1stData } from "@/data/english1stData";
 import { english2ndData } from "@/data/english2ndData";
 
 const allSubjects = [
@@ -40,8 +39,7 @@ const allSubjects = [
   { data: biologyData, label: "Bio 1" },
   { data: biology2ndData, label: "Bio 2" },
   { data: ictData, label: "ICT" },
-  { data: english1stReadingData, label: "Eng R" },
-  { data: english1stWritingData, label: "Eng W" },
+  { data: english1stData, label: "Eng 1" },
   { data: english2ndData, label: "Eng 2" },
 ];
 
