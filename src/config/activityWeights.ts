@@ -87,60 +87,35 @@ export const mathConfig: SubjectConfig = {
   },
 };
 
-// English 1st Paper - Reading Section
-// 7 activities per unit, marks distribution: MCQ(5), Open-ended(10), Info Transfer(10), 
-// Summarizing(5), Cloze with clues(10), Cloze without clues(10), Rearranging(10) = 60 total
-// Normalized to 100%
-export const englishReadingConfig: SubjectConfig = {
-  sections: {
-    core: {
-      max: 25,
-      activities: {
-        "MCQ": 8,          // 5/60 ≈ 8%
-        "Summarizing": 8,  // 5/60 ≈ 8%
-        "Rearranging": 9,  // Remaining from core
-      },
-    },
-    mcq: {
-      max: 25,
-      activities: {
-        "Open-ended": 17,  // 10/60 ≈ 17%
-        "Info Transfer": 8,
-      },
-    },
-    cq: {
-      max: 50,
-      activities: {
-        "Info Transfer": 9, // Split across sections
-        "Cloze (with clues)": 17,    // 10/60 ≈ 17%
-        "Cloze (without clues)": 17, // 10/60 ≈ 17%
-        "Rearranging": 7,  // Additional weight
-      },
-    },
-  },
-};
-
-// English 1st Paper - Writing Section
-// 4 activities per chapter: Practice, Summary, Final Draft, Revision
-export const englishWritingConfig: SubjectConfig = {
+// English 1st Paper - Combined Reading (60%) + Writing (40%)
+// Reading: 7 activities per unit (MCQ, Open-ended, Info Transfer, Summarizing, Cloze with/without clues, Rearranging)
+// Writing: 4 activities per chapter (Practice, Summary, Final Draft, Revision)
+export const english1stConfig: SubjectConfig = {
   sections: {
     core: {
       max: 30,
       activities: {
-        "Practice": 30,
+        "MCQ": 8,
+        "Summarizing": 8,
+        "Practice": 14,
       },
     },
     mcq: {
-      max: 20,
+      max: 25,
       activities: {
-        "Summary": 20,
+        "Open-ended": 12,
+        "Info Transfer": 8,
+        "Summary": 5,
       },
     },
     cq: {
-      max: 50,
+      max: 45,
       activities: {
-        "Final Draft": 35,
-        "Revision": 15,
+        "Cloze (with clues)": 10,
+        "Cloze (without clues)": 10,
+        "Rearranging": 10,
+        "Final Draft": 10,
+        "Revision": 5,
       },
     },
   },
@@ -178,13 +153,11 @@ export const english2ndConfig: SubjectConfig = {
 // Get the appropriate config based on subject ID
 export const getSubjectConfig = (subjectId: string): SubjectConfig => {
   const mathSubjects = ["highermath", "highermath2nd"];
-  const englishReadingSubjects = ["english1st-reading"];
-  const englishWritingSubjects = ["english1st-writing"];
+  const english1stSubjects = ["english1st"];
   const english2ndSubjects = ["english2nd"];
   
   if (mathSubjects.includes(subjectId)) return mathConfig;
-  if (englishReadingSubjects.includes(subjectId)) return englishReadingConfig;
-  if (englishWritingSubjects.includes(subjectId)) return englishWritingConfig;
+  if (english1stSubjects.includes(subjectId)) return english1stConfig;
   if (english2ndSubjects.includes(subjectId)) return english2ndConfig;
   
   return scienceConfig;
