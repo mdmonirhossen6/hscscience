@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Home from "./pages/Home";
 import Tracker from "./pages/Tracker";
+import Overview from "./pages/Overview";
 import Downloads from "./pages/Downloads";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/tracker" element={<Tracker />} />
+            <Route path="/overview" element={<Overview />} />
             <Route path="/planning" element={<MonthlyPlanning />} />
             <Route path="/downloads" element={<Downloads />} />
             <Route path="/about" element={<About />} />
