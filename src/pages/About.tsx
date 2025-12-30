@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Facebook, Instagram, Send, Github, Youtube, Mail, ExternalLink } from "lucide-react";
+import hscTrackerLogo from "@/assets/hsc-tracker-logo.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -40,13 +41,12 @@ export default function About() {
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col md:flex-row gap-6 items-start">
               {/* Logo */}
-              <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                <div className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-1 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <span className="text-2xl">📚</span>
-                  </div>
-                  <span className="text-xs font-medium text-primary">HSC Tracker</span>
-                </div>
+              <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img 
+                  src={hscTrackerLogo} 
+                  alt="HSC Tracker Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               {/* Info */}
