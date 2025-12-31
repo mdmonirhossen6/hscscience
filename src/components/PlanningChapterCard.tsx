@@ -22,7 +22,9 @@ interface PlanningChapterCardProps {
   isPlanned: boolean;
 }
 
+// All activities from all subjects that can be planned
 const PLANNABLE_ACTIVITIES = [
+  // Science subjects
   "Lecture",
   "ক",
   "খ",
@@ -33,6 +35,40 @@ const PLANNABLE_ACTIVITIES = [
   "Written CQ",
   "Revision",
   "Exam",
+  // Math subjects
+  "CQ Practice",
+  "Book Problems",
+  // English 1st Paper - Reading
+  "SQ",
+  "Info Transfer",
+  "Vocabulary",
+  // English 1st Paper - Grammar
+  "Practice",
+  "Model Answers",
+  "Error Analysis",
+  "Mock Practice",
+  // English 1st Paper - Writing
+  "Practice Drafts",
+  "Model Review",
+  "Final Draft",
+  // English 2nd Paper - Grammar
+  "Practice Sets",
+  "Error Log",
+  "Final Practice",
+  // English 2nd Paper - Functional
+  "Model Samples",
+  "Expressions",
+  // English 2nd Paper - Creative
+  "Idea Planning",
+  "Practice Writing",
+  "Model Reading",
+  // Bangla 1st Paper - গদ্য
+  "Text Reading",
+  // Bangla 1st Paper - কবিতা
+  "Poem Reading",
+  "Theme",
+  // Bangla 1st Paper - উপন্যাস
+  "Chapter Reading",
 ];
 
 export function PlanningChapterCard({
