@@ -3,7 +3,7 @@ import { SubjectData } from "@/types/tracker";
 // Reading Section activities (for Units 1-12) - Only core activities
 const UNIT_ACTIVITIES = [
   "MCQ",
-  "Open-ended",
+  "SQ",
   "Info Transfer",
 ];
 
