@@ -173,30 +173,87 @@ export const english1stWritingConfig: SubjectConfig = {
   },
 };
 
-// English 2nd Paper - Grammar (60%) + Composition (40%)
-// Grammar chapters (1-12): Practice, Rules Summary, Mock Test, Revision
-// Composition chapters (13-16): Practice, Draft Writing, Final Copy, Revision
-export const english2ndConfig: SubjectConfig = {
+// English 2nd Paper - 3 Groups with different activity structures
+// Group A (01-12): Grammar Core - Lecture 20%, Practice Sets 35%, Model Answers 15%, Error Log 10%, Revision 10%, Final Practice 10%
+// Group B (13-14): Functional Writing - Lecture 25%, Practice Drafts 30%, Model Samples 15%, Final Draft 15%, Expressions 5%, Revision 10%
+// Group C (15-16): Creative Writing - Lecture 20%, Idea Planning 15%, Practice Writing 30%, Model Reading 10%, Final Draft 15%, Revision 10%
+
+// Group A: Grammar Core (01-12) - Practice-heavy
+export const english2ndGrammarConfig: SubjectConfig = {
   sections: {
     core: {
-      max: 30,
+      max: 55,
       activities: {
-        "Practice": 30,
+        "Lecture": 20,
+        "Practice Sets": 35,
       },
     },
     mcq: {
       max: 25,
       activities: {
-        "Rules Summary": 15,
-        "Draft Writing": 10,
+        "Model Answers": 15,
+        "Error Log": 10,
       },
     },
     cq: {
-      max: 45,
+      max: 20,
       activities: {
-        "Mock Test": 15,
-        "Final Copy": 15,
-        "Revision": 15,
+        "Revision": 10,
+        "Final Practice": 10,
+      },
+    },
+  },
+};
+
+// Group B: Functional Writing (13-14) - Format-driven
+export const english2ndFunctionalConfig: SubjectConfig = {
+  sections: {
+    core: {
+      max: 55,
+      activities: {
+        "Lecture": 25,
+        "Practice Drafts": 30,
+      },
+    },
+    mcq: {
+      max: 30,
+      activities: {
+        "Model Samples": 15,
+        "Final Draft": 15,
+      },
+    },
+    cq: {
+      max: 15,
+      activities: {
+        "Expressions": 5,
+        "Revision": 10,
+      },
+    },
+  },
+};
+
+// Group C: Creative Writing (15-16) - Idea + structure focused
+export const english2ndCreativeConfig: SubjectConfig = {
+  sections: {
+    core: {
+      max: 50,
+      activities: {
+        "Lecture": 20,
+        "Practice Writing": 30,
+      },
+    },
+    mcq: {
+      max: 25,
+      activities: {
+        "Idea Planning": 15,
+        "Model Reading": 10,
+      },
+    },
+    cq: {
+      max: 25,
+      activities: {
+        "Final Draft": 15,
+        "Revision": 10,
       },
     },
   },
@@ -205,10 +262,8 @@ export const english2ndConfig: SubjectConfig = {
 // Get the appropriate config based on subject ID and chapter
 export const getSubjectConfig = (subjectId: string, chapterId?: number): SubjectConfig => {
   const mathSubjects = ["highermath", "highermath2nd"];
-  const english2ndSubjects = ["english2nd"];
   
   if (mathSubjects.includes(subjectId)) return mathConfig;
-  if (english2ndSubjects.includes(subjectId)) return english2ndConfig;
   
   // English 1st Paper has 3 different configs based on chapter
   if (subjectId === "english1st") {
@@ -218,6 +273,16 @@ export const getSubjectConfig = (subjectId: string, chapterId?: number): Subject
       return english1stGrammarConfig; // Grammar & Mechanics (13-16)
     }
     return english1stReadingConfig; // Reading Units (1-12)
+  }
+  
+  // English 2nd Paper has 3 different configs based on chapter
+  if (subjectId === "english2nd") {
+    if (chapterId && chapterId >= 15) {
+      return english2ndCreativeConfig; // Creative Writing (15-16)
+    } else if (chapterId && chapterId >= 13) {
+      return english2ndFunctionalConfig; // Functional Writing (13-14)
+    }
+    return english2ndGrammarConfig; // Grammar Core (01-12)
   }
   
   return scienceConfig;
