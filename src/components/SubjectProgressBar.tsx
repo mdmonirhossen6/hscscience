@@ -5,7 +5,8 @@ import { getSubjectConfig } from "@/config/activityWeights";
 import { normalizeActivity } from "@/config/activityMapping";
 import { Chapter } from "@/types/tracker";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SubjectProgressBarProps {
   subjectId: string;
@@ -21,7 +22,7 @@ export const SubjectProgressBar = ({
   color 
 }: SubjectProgressBarProps) => {
   const { user } = useAuth();
-  const { loading, getStatus } = useStudyRecords(subjectId);
+  const { loading, getStatus, refetch } = useStudyRecords(subjectId);
 
   const overallProgress = useMemo(() => {
     if (!user || loading) return 0;
@@ -95,7 +96,18 @@ export const SubjectProgressBar = ({
   return (
     <div className="bg-card/60 rounded-xl p-4 mb-4">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="font-semibold text-foreground">{subjectName} Progress</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-foreground">{subjectName} Progress</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => refetch()}
+            disabled={loading}
+          >
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          </Button>
+        </div>
         <span className={cn(
           "text-lg font-bold",
           overallProgress >= 100 ? "text-emerald-500" :
