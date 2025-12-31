@@ -57,7 +57,7 @@ export default function Tracker() {
     <div className="h-screen flex flex-col bg-background">
       <MobileHeader title={activeSubject.data.name} />
 
-      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 pb-24 md:pb-8">
+      <main className="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-4 py-4 pb-24 md:pb-8">
         <div className="max-w-5xl mx-auto">
         {/* Subject Pills - Horizontal scroll */}
         <div className="mb-4 -mx-4 px-4 md:mx-0 md:px-0">
