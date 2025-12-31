@@ -45,6 +45,7 @@ export const useStudyRecords = (subjectId: string) => {
     data: records = [],
     isLoading,
     isFetching,
+    refetch,
   } = useQuery({
     queryKey,
     enabled: !!user && !!subjectId,
@@ -280,6 +281,7 @@ export const useStudyRecords = (subjectId: string) => {
     saveClassNumber,
     getStatus,
     getClassNumber,
+    refetch,
   };
 };
 
