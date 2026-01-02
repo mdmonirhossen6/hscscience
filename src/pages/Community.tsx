@@ -241,12 +241,12 @@ export default function Community() {
                         </p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>{totalCompleted} activities completed</span>
-                          {isAdmin && user.email && (
-                            <span className="flex items-center gap-1 text-primary">
-                              <Mail className="h-3 w-3" />
-                              {user.email}
-                            </span>
-                          )}
+                            {user.email && (
+                              <span className="flex items-center gap-1 text-primary">
+                                <Mail className="h-3 w-3" />
+                                {user.email}
+                              </span>
+                            )}
                         </div>
                       </div>
                       <Badge variant="secondary">{overallProgress}%</Badge>
@@ -281,13 +281,13 @@ export default function Community() {
                           </p>
                           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                             <span>{subjectKeys.length} subjects</span>
-                            {isAdmin && user.email && (
+                            {user.email && (
                               <span className="flex items-center gap-1 text-primary">
                                 <Mail className="h-3 w-3" />
                                 {user.email}
                               </span>
                             )}
-                            {isAdmin && user.lastActiveAt && (
+                            {user.lastActiveAt && (
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 Last active: {format(new Date(user.lastActiveAt), "MMM d, yyyy")}
