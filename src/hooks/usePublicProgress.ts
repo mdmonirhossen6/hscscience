@@ -65,7 +65,7 @@ export const usePublicProgress = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkAdminAndFetch = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         
@@ -77,18 +77,15 @@ export const usePublicProgress = () => {
             .eq("user_id", user.id)
             .maybeSingle();
           
-          const adminStatus = roleData?.role === "admin";
-          setIsAdmin(adminStatus);
-
-          // If admin, fetch all profiles with emails
-          if (adminStatus) {
-            const { data: profilesData } = await supabase
-              .from("profiles")
-              .select("user_id, email, display_name, last_active_at, created_at");
-            
-            setUserProfiles(profilesData || []);
-          }
+          setIsAdmin(roleData?.role === "admin");
         }
+        
+        // Fetch all profiles with emails (visible to everyone)
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, email, display_name, last_active_at, created_at");
+        
+        setUserProfiles(profilesData || []);
         
         // Fetch public study progress from view
         const { data: studyData, error: studyError } = await supabase
@@ -122,7 +119,7 @@ export const usePublicProgress = () => {
       }
     };
 
-    checkAdminAndFetch();
+    fetchData();
   }, [user]);
 
   // Aggregate progress by user
@@ -142,9 +139,9 @@ export const usePublicProgress = () => {
         userMap.set(record.profile_id, {
           profileId: record.profile_id,
           displayName: record.display_name || "Anonymous Student",
-          email: isAdmin ? profile?.email : undefined,
-          lastActiveAt: isAdmin ? profile?.last_active_at : undefined,
-          createdAt: isAdmin ? profile?.created_at : undefined,
+          email: profile?.email,
+          lastActiveAt: profile?.last_active_at,
+          createdAt: profile?.created_at,
           subjects: {},
           lastUpdated: record.updated_at,
         });
@@ -193,9 +190,9 @@ export const usePublicProgress = () => {
         userMap.set(record.profile_id, {
           profileId: record.profile_id,
           displayName: record.display_name || "Anonymous Student",
-          email: isAdmin ? profile?.email : undefined,
-          lastActiveAt: isAdmin ? profile?.last_active_at : undefined,
-          createdAt: isAdmin ? profile?.created_at : undefined,
+          email: profile?.email,
+          lastActiveAt: profile?.last_active_at,
+          createdAt: profile?.created_at,
           subjects: {},
           lastUpdated: record.updated_at,
         });
