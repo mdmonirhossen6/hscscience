@@ -2,139 +2,27 @@ import { Link } from "react-router-dom";
 import { CircularProgress } from "@/components/CircularProgress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { physicsData } from "@/data/physicsData";
-import { physics2ndData } from "@/data/physics2ndData";
-import { chemistryData } from "@/data/chemistryData";
-import { chemistry2ndData } from "@/data/chemistry2ndData";
-import { higherMathData } from "@/data/higherMathData";
-import { higherMath2ndData } from "@/data/higherMath2ndData";
-import { biologyData } from "@/data/biologyData";
-import { biology2ndData } from "@/data/biology2ndData";
-import { ictData } from "@/data/ictData";
-import { english1stData } from "@/data/english1stData";
-import { english2ndData } from "@/data/english2ndData";
-import { bangla1stData } from "@/data/bangla1stData";
-import { bangla2ndData } from "@/data/bangla2ndData";
-import { useState, useEffect } from "react";
 import { MonthlySummary } from "@/components/MonthlySummary";
 import { MobileHeader } from "@/components/MobileHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { generateOverallProgressPDF, generateDetailedProgressPDF } from "@/lib/pdfGenerator";
-
-interface SubjectProgress {
-  name: string;
-  fullName: string;
-  progress: number;
-  color: string;
-}
+import { useProgressSnapshot, ALL_SUBJECTS } from "@/hooks/useProgressSnapshot";
 
 export default function Home() {
   const { user } = useAuth();
-  const [overallProgress, setOverallProgress] = useState(0);
-  const [subjectProgresses, setSubjectProgresses] = useState<SubjectProgress[]>([]);
-  const [recordMap, setRecordMap] = useState<Map<string, string>>(new Map());
-
-  useEffect(() => {
-    if (!user) {
-      setOverallProgress(0);
-      setSubjectProgresses([]);
-      return;
-    }
-
-    const fetchProgress = async () => {
-      const allSubjects = [
-        { data: physicsData, color: "hsl(var(--primary))", displayName: "Physics 1st" },
-        { data: physics2ndData, color: "hsl(217 91% 60%)", displayName: "Physics 2nd" },
-        { data: chemistryData, color: "hsl(142 76% 36%)", displayName: "Chemistry 1st" },
-        { data: chemistry2ndData, color: "hsl(142 71% 45%)", displayName: "Chemistry 2nd" },
-        { data: higherMathData, color: "hsl(262 83% 58%)", displayName: "HM 1st" },
-        { data: higherMath2ndData, color: "hsl(262 78% 68%)", displayName: "HM 2nd" },
-        { data: biologyData, color: "hsl(25 95% 53%)", displayName: "Biology 1st" },
-        { data: biology2ndData, color: "hsl(25 90% 63%)", displayName: "Biology 2nd" },
-        { data: ictData, color: "hsl(199 89% 48%)", displayName: "ICT" },
-        { data: english1stData, color: "hsl(340 82% 52%)", displayName: "English 1st" },
-        { data: english2ndData, color: "hsl(280 70% 55%)", displayName: "English 2nd" },
-        { data: bangla1stData, color: "hsl(45 93% 47%)", displayName: "বাংলা ১ম" },
-        { data: bangla2ndData, color: "hsl(35 90% 50%)", displayName: "বাংলা ২য়" },
-      ];
-
-      const { data: records } = await supabase
-        .from("study_records")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("type", "status");
-
-      const newRecordMap = new Map<string, string>();
-      records?.forEach((r) => {
-        newRecordMap.set(`${r.subject}-${r.chapter}-${r.activity}`, r.status || "");
-      });
-      setRecordMap(newRecordMap);
-
-      let totalCompleted = 0;
-      let totalItems = 0;
-      const progresses: SubjectProgress[] = [];
-
-      allSubjects.forEach(({ data: subject, color, displayName }) => {
-        let subjectCompleted = 0;
-        let subjectTotal = 0;
-
-        subject.chapters.forEach((chapter) => {
-          chapter.activities.forEach((activity) => {
-            if (activity.name !== "Total Lec") {
-              totalItems++;
-              subjectTotal++;
-              const status = newRecordMap.get(`${subject.id}-${chapter.name}-${activity.name}`);
-              if (status === "Done") {
-                totalCompleted++;
-                subjectCompleted++;
-              }
-            }
-          });
-        });
-
-        progresses.push({
-          name: displayName,
-          fullName: subject.name,
-          progress: subjectTotal > 0 ? Math.round((subjectCompleted / subjectTotal) * 100) : 0,
-          color,
-        });
-      });
-
-      setOverallProgress(totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0);
-      setSubjectProgresses(progresses);
-    };
-
-    fetchProgress();
-  }, [user]);
+  const { overallProgress, subjects, recordMap } = useProgressSnapshot();
 
   const handleDownloadOverallPDF = async () => {
     if (!user?.email) return;
-    await generateOverallProgressPDF(user.email, overallProgress, subjectProgresses);
+    await generateOverallProgressPDF(user.email, overallProgress, subjects);
   };
 
   const handleDownloadDetailedPDF = async () => {
     if (!user?.email) return;
     
-    const allSubjects = [
-      { data: physicsData, displayName: "Physics 1st" },
-      { data: physics2ndData, displayName: "Physics 2nd" },
-      { data: chemistryData, displayName: "Chemistry 1st" },
-      { data: chemistry2ndData, displayName: "Chemistry 2nd" },
-      { data: higherMathData, displayName: "HM 1st" },
-      { data: higherMath2ndData, displayName: "HM 2nd" },
-      { data: biologyData, displayName: "Biology 1st" },
-      { data: biology2ndData, displayName: "Biology 2nd" },
-      { data: ictData, displayName: "ICT" },
-      { data: english1stData, displayName: "English 1st" },
-      { data: english2ndData, displayName: "English 2nd" },
-      { data: bangla1stData, displayName: "বাংলা ১ম" },
-      { data: bangla2ndData, displayName: "বাংলা ২য়" },
-    ];
-
-    const subjectDetails = allSubjects.map(({ data, displayName }) => ({
+    const subjectDetails = ALL_SUBJECTS.map(({ data, displayName }) => ({
       id: data.id,
       name: data.name,
       displayName,
@@ -147,7 +35,7 @@ export default function Home() {
     await generateDetailedProgressPDF(
       user.email,
       overallProgress,
-      subjectProgresses,
+      subjects,
       subjectDetails,
       recordMap
     );
@@ -196,7 +84,7 @@ export default function Home() {
           </h2>
           <div className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth-touch pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-5 md:overflow-visible">
             <TooltipProvider>
-              {subjectProgresses.map((subject, index) => (
+              {subjects.map((subject, index) => (
                 <Tooltip key={subject.name}>
                   <TooltipTrigger asChild>
                     <Link 

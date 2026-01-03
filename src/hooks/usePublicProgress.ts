@@ -1,26 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { calculateUserProgress, ALL_SUBJECTS } from "./useProgressSnapshot";
 
-interface PublicStudyProgress {
-  id: string;
+interface PublicStudyRecord {
   profile_id: string;
   display_name: string | null;
   subject: string;
   chapter: string;
   activity: string;
   status: string | null;
-  updated_at: string;
-}
-
-interface PublicChapterProgress {
-  id: string;
-  profile_id: string;
-  display_name: string | null;
-  subject: string;
-  chapter: string;
-  completed: boolean;
-  completed_at: string | null;
   updated_at: string;
 }
 
@@ -33,33 +22,17 @@ interface UserProfile {
   created_at: string;
 }
 
-export interface AggregatedUserProgress {
+export interface CommunityUserProgress {
   profileId: string;
   displayName: string;
-  email?: string | null;
-  lastActiveAt?: string | null;
-  createdAt?: string;
-  subjects: {
-    [subjectId: string]: {
-      completedActivities: number;
-      totalActivities: number;
-      completedChapters: number;
-      chapters: {
-        [chapterName: string]: {
-          completedActivities: number;
-          totalActivities: number;
-          isCompleted: boolean;
-        };
-      };
-    };
-  };
+  overallProgress: number;
+  subjects: Record<string, number>; // subjectId -> percentage
   lastUpdated: string | null;
 }
 
 export const usePublicProgress = () => {
   const { user } = useAuth();
-  const [studyProgress, setStudyProgress] = useState<PublicStudyProgress[]>([]);
-  const [chapterProgress, setChapterProgress] = useState<PublicChapterProgress[]>([]);
+  const [studyRecords, setStudyRecords] = useState<PublicStudyRecord[]>([]);
   const [userProfiles, setUserProfiles] = useState<UserProfile[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -81,7 +54,7 @@ export const usePublicProgress = () => {
           setIsAdmin(roleData?.role === "admin");
         }
         
-        // Fetch all profiles with emails (visible to everyone)
+        // Fetch all profiles
         const { data: profilesData } = await supabase
           .from("profiles")
           .select("id, user_id, email, display_name, last_active_at, created_at");
@@ -91,26 +64,14 @@ export const usePublicProgress = () => {
         // Fetch public study progress from view
         const { data: studyData, error: studyError } = await supabase
           .from("public_study_progress")
-          .select("*")
+          .select("profile_id, display_name, subject, chapter, activity, status, updated_at")
           .order("updated_at", { ascending: false });
 
         if (studyError) {
           console.error("Error fetching public study progress:", studyError);
           setError(studyError.message);
         } else {
-          setStudyProgress(studyData || []);
-        }
-
-        // Fetch public chapter progress from view
-        const { data: chapterData, error: chapterError } = await supabase
-          .from("public_chapter_progress")
-          .select("*")
-          .order("updated_at", { ascending: false });
-
-        if (chapterError) {
-          console.error("Error fetching public chapter progress:", chapterError);
-        } else {
-          setChapterProgress(chapterData || []);
+          setStudyRecords(studyData || []);
         }
       } catch (err) {
         console.error("Error fetching public progress:", err);
@@ -123,128 +84,64 @@ export const usePublicProgress = () => {
     fetchData();
   }, [user]);
 
-  // Aggregate progress by user
-  const aggregatedProgress: AggregatedUserProgress[] = (() => {
-    const userMap = new Map<string, AggregatedUserProgress>();
-
-    // Create a lookup for profile data (support both profile.id and profile.user_id keys)
+  // Aggregate progress by user using the SAME calculation as Home
+  const aggregatedProgress: CommunityUserProgress[] = useMemo(() => {
+    // Create a lookup for profile data
     const profileLookup = new Map<string, UserProfile>();
     userProfiles.forEach((profile) => {
       profileLookup.set(profile.id, profile);
       profileLookup.set(profile.user_id, profile);
     });
 
-    // Process study records
-    studyProgress.forEach((record) => {
+    // Group records by profile_id
+    const recordsByUser = new Map<string, PublicStudyRecord[]>();
+    studyRecords.forEach((record) => {
       if (!record.profile_id) return;
-
-      if (!userMap.has(record.profile_id)) {
-        const profile = profileLookup.get(record.profile_id);
-        userMap.set(record.profile_id, {
-          profileId: record.profile_id,
-          displayName: profile?.display_name || record.display_name || profile?.email || "Anonymous Student",
-          email: profile?.email,
-          lastActiveAt: profile?.last_active_at,
-          createdAt: profile?.created_at,
-          subjects: {},
-          lastUpdated: record.updated_at,
-        });
-      }
-
-      const user = userMap.get(record.profile_id)!;
       
-      if (!user.subjects[record.subject]) {
-        user.subjects[record.subject] = {
-          completedActivities: 0,
-          totalActivities: 0,
-          completedChapters: 0,
-          chapters: {},
-        };
+      if (!recordsByUser.has(record.profile_id)) {
+        recordsByUser.set(record.profile_id, []);
       }
-
-      const subject = user.subjects[record.subject];
-
-      if (!subject.chapters[record.chapter]) {
-        subject.chapters[record.chapter] = {
-          completedActivities: 0,
-          totalActivities: 0,
-          isCompleted: false,
-        };
-      }
-
-      const chapter = subject.chapters[record.chapter];
-      chapter.totalActivities++;
-      subject.totalActivities++;
-
-      if (record.status === "Done") {
-        chapter.completedActivities++;
-        subject.completedActivities++;
-      }
-
-      // Update last updated time
-      if (record.updated_at > (user.lastUpdated || "")) {
-        user.lastUpdated = record.updated_at;
-      }
+      recordsByUser.get(record.profile_id)!.push(record);
     });
 
-    // Process chapter completions
-    chapterProgress.forEach((record) => {
-      if (!record.profile_id) return;
+    // Calculate progress for each user using the SAME function as Home
+    const results: CommunityUserProgress[] = [];
 
-      if (!userMap.has(record.profile_id)) {
-        const profile = profileLookup.get(record.profile_id);
-        userMap.set(record.profile_id, {
-          profileId: record.profile_id,
-          displayName: profile?.display_name || record.display_name || profile?.email || "Anonymous Student",
-          email: profile?.email,
-          lastActiveAt: profile?.last_active_at,
-          createdAt: profile?.created_at,
-          subjects: {},
-          lastUpdated: record.updated_at,
-        });
-      }
+    recordsByUser.forEach((records, profileId) => {
+      const profile = profileLookup.get(profileId);
+      const displayName = profile?.display_name || records[0]?.display_name || profile?.email || "Anonymous Student";
+      
+      // Use the exact same calculation function as Home page
+      const { overallProgress, subjects } = calculateUserProgress(records);
+      
+      const lastUpdated = records.reduce((latest, r) => {
+        if (!latest || r.updated_at > latest) return r.updated_at;
+        return latest;
+      }, null as string | null);
 
-      const user = userMap.get(record.profile_id)!;
-
-      if (!user.subjects[record.subject]) {
-        user.subjects[record.subject] = {
-          completedActivities: 0,
-          totalActivities: 0,
-          completedChapters: 0,
-          chapters: {},
-        };
-      }
-
-      const subject = user.subjects[record.subject];
-
-      if (!subject.chapters[record.chapter]) {
-        subject.chapters[record.chapter] = {
-          completedActivities: 0,
-          totalActivities: 0,
-          isCompleted: false,
-        };
-      }
-
-      if (record.completed) {
-        subject.chapters[record.chapter].isCompleted = true;
-        subject.completedChapters++;
-      }
+      results.push({
+        profileId,
+        displayName,
+        overallProgress,
+        subjects,
+        lastUpdated,
+      });
     });
 
-    return Array.from(userMap.values()).sort((a, b) => {
-      // Sort by total completed activities
-      const aTotal = Object.values(a.subjects).reduce((sum, s) => sum + s.completedActivities, 0);
-      const bTotal = Object.values(b.subjects).reduce((sum, s) => sum + s.completedActivities, 0);
-      return bTotal - aTotal;
-    });
-  })();
+    // Sort by overall progress percentage (descending)
+    return results.sort((a, b) => b.overallProgress - a.overallProgress);
+  }, [studyRecords, userProfiles]);
 
   return {
-    studyProgress,
-    chapterProgress,
     aggregatedProgress,
     isAdmin,
     loading,
     error,
   };
 };
+
+// Subject labels for display
+export const SUBJECT_LABELS: Record<string, string> = {};
+ALL_SUBJECTS.forEach((s) => {
+  SUBJECT_LABELS[s.id] = s.displayName;
+});
