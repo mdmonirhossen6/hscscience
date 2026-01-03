@@ -1,4 +1,4 @@
-import { usePublicProgress } from "@/hooks/usePublicProgress";
+import { usePublicProgress, SUBJECT_LABELS } from "@/hooks/usePublicProgress";
 import { MobileHeader } from "@/components/MobileHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Card } from "@/components/ui/card";
@@ -19,22 +19,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
-const subjectLabels: Record<string, string> = {
-  physics1: "Physics 1st",
-  physics2: "Physics 2nd",
-  chemistry1: "Chemistry 1st",
-  chemistry2: "Chemistry 2nd",
-  higherMath1: "Higher Math 1st",
-  higherMath2: "Higher Math 2nd",
-  biology1: "Biology 1st",
-  biology2: "Biology 2nd",
-  ict: "ICT",
-  english1: "English 1st",
-  english2: "English 2nd",
-  bangla1: "Bangla 1st",
-  bangla2: "Bangla 2nd",
-};
 
 export default function Community() {
   const { aggregatedProgress, loading, error } = usePublicProgress();
@@ -58,30 +42,13 @@ export default function Community() {
     );
   }
 
-  const getOverallProgress = (subjects: Record<string, { completedActivities: number; totalActivities: number }>) => {
-    let total = 0;
-    let completed = 0;
-    Object.values(subjects).forEach((s) => {
-      total += s.totalActivities;
-      completed += s.completedActivities;
-    });
-    return total > 0 ? Math.round((completed / total) * 100) : 0;
-  };
-
-  // Sort users by overall progress percentage
-  const sortedProgress = [...aggregatedProgress].sort((a, b) => {
-    const aPct = getOverallProgress(a.subjects);
-    const bPct = getOverallProgress(b.subjects);
-    return bPct - aPct;
-  });
-
   return (
     <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
       <MobileHeader title="Community" />
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-xl bg-primary/10">
             <Users className="h-6 w-6 text-primary" />
           </div>
@@ -92,6 +59,13 @@ export default function Community() {
             </p>
           </div>
         </div>
+
+        {/* Info Banner */}
+        <Card className="p-3 mb-6 bg-muted/50 border-muted">
+          <p className="text-xs text-muted-foreground text-center">
+            Progress shown here uses the same calculation as Home.
+          </p>
+        </Card>
 
         {error && (
           <Card className="p-4 mb-6 border-destructive">
@@ -119,53 +93,48 @@ export default function Community() {
                 <h2 className="font-semibold text-foreground">Top Students</h2>
               </div>
               <div className="space-y-3">
-                {sortedProgress.slice(0, 3).map((user, index) => {
-                  const overallProgress = getOverallProgress(user.subjects);
-
-                  return (
-                    <div 
-                      key={user.profileId}
-                      className="flex items-center gap-3"
-                    >
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
-                        index === 0 ? "bg-yellow-500 text-yellow-950" :
-                        index === 1 ? "bg-gray-300 text-gray-700" :
-                        "bg-amber-600 text-amber-950"
-                      )}>
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground truncate">
-                          {user.displayName}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Progress 
-                          value={overallProgress} 
-                          className="w-20 h-2"
-                        />
-                        <span className={cn(
-                          "text-sm font-medium min-w-[3ch]",
-                          overallProgress >= 70 ? "text-green-500" :
-                          overallProgress >= 40 ? "text-yellow-500" :
-                          "text-muted-foreground"
-                        )}>
-                          {overallProgress}%
-                        </span>
-                      </div>
+                {aggregatedProgress.slice(0, 3).map((user, index) => (
+                  <div 
+                    key={user.profileId}
+                    className="flex items-center gap-3"
+                  >
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm",
+                      index === 0 ? "bg-yellow-500 text-yellow-950" :
+                      index === 1 ? "bg-gray-300 text-gray-700" :
+                      "bg-amber-600 text-amber-950"
+                    )}>
+                      {index + 1}
                     </div>
-                  );
-                })}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">
+                        {user.displayName}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress 
+                        value={user.overallProgress} 
+                        className="w-20 h-2"
+                      />
+                      <span className={cn(
+                        "text-sm font-medium min-w-[3ch]",
+                        user.overallProgress >= 70 ? "text-green-500" :
+                        user.overallProgress >= 40 ? "text-yellow-500" :
+                        "text-muted-foreground"
+                      )}>
+                        {user.overallProgress}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </Card>
 
             {/* All Users */}
             <div className="space-y-3">
-              {sortedProgress.map((user) => {
+              {aggregatedProgress.map((user) => {
                 const isExpanded = expandedUsers.has(user.profileId);
-                const overallProgress = getOverallProgress(user.subjects);
-                const subjectKeys = Object.keys(user.subjects);
+                const subjectEntries = Object.entries(user.subjects).filter(([, progress]) => progress > 0);
 
                 return (
                   <Collapsible key={user.profileId}>
@@ -184,64 +153,54 @@ export default function Community() {
                             {user.displayName}
                           </p>
                           <span className="text-xs text-muted-foreground">
-                            {subjectKeys.length} subjects
+                            {subjectEntries.length} subjects with progress
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Progress 
-                            value={overallProgress} 
+                            value={user.overallProgress} 
                             className="w-20 h-2"
                           />
                           <span className={cn(
                             "text-sm font-medium min-w-[3ch]",
-                            overallProgress >= 70 ? "text-green-500" :
-                            overallProgress >= 40 ? "text-yellow-500" :
+                            user.overallProgress >= 70 ? "text-green-500" :
+                            user.overallProgress >= 40 ? "text-yellow-500" :
                             "text-muted-foreground"
                           )}>
-                            {overallProgress}%
+                            {user.overallProgress}%
                           </span>
                         </div>
                       </CollapsibleTrigger>
 
                       <CollapsibleContent>
                         <div className="px-4 pb-4 pt-0 space-y-2">
-                          {subjectKeys.length === 0 ? (
+                          {subjectEntries.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-4">
                               No progress data yet
                             </p>
                           ) : (
-                            subjectKeys.map((subjectId) => {
-                              const subject = user.subjects[subjectId];
-                              const subjectProgress = subject.totalActivities > 0
-                                ? Math.round((subject.completedActivities / subject.totalActivities) * 100)
-                                : 0;
-
-                              return (
-                                <div 
-                                  key={subjectId}
-                                  className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <BookOpen className="h-4 w-4 text-primary" />
-                                    <span className="text-sm font-medium text-foreground">
-                                      {subjectLabels[subjectId] || subjectId}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground">
-                                      {subject.completedActivities}/{subject.totalActivities}
-                                    </span>
-                                    <Progress 
-                                      value={subjectProgress} 
-                                      className="w-16 h-2"
-                                    />
-                                    <span className="text-xs text-muted-foreground min-w-[3ch]">
-                                      {subjectProgress}%
-                                    </span>
-                                  </div>
+                            subjectEntries.map(([subjectId, progress]) => (
+                              <div 
+                                key={subjectId}
+                                className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <BookOpen className="h-4 w-4 text-primary" />
+                                  <span className="text-sm font-medium text-foreground">
+                                    {SUBJECT_LABELS[subjectId] || subjectId}
+                                  </span>
                                 </div>
-                              );
-                            })
+                                <div className="flex items-center gap-2">
+                                  <Progress 
+                                    value={progress} 
+                                    className="w-16 h-2"
+                                  />
+                                  <span className="text-xs text-muted-foreground min-w-[3ch]">
+                                    {progress}%
+                                  </span>
+                                </div>
+                              </div>
+                            ))
                           )}
                         </div>
                       </CollapsibleContent>
