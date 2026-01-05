@@ -66,7 +66,8 @@ export const usePublicProgress = () => {
         const { data: studyData, error: studyError } = await supabase
           .from("public_study_progress")
           .select("user_id, profile_id, display_name, subject, chapter, activity, status, updated_at")
-          .order("updated_at", { ascending: false });
+          // IMPORTANT: we need newest updates to win when building a map; ascending order prevents older rows overwriting newer status.
+          .order("updated_at", { ascending: true });
 
         if (studyError) {
           console.error("Error fetching public study progress:", studyError);
