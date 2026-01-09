@@ -196,7 +196,7 @@ function getStatusStyles(status: string): { color: string; bg: string; border: s
   return { color: COLORS.muted, bg: COLORS.mutedBg, border: COLORS.mutedBorder, icon: "○" };
 }
 
-// Simple 1-page overall progress PDF - compact 2-column layout to fit all 13 subjects
+// Simple 1-page overall progress PDF - matches detailed PDF first page exactly
 export async function generateOverallProgressPDF(
   email: string,
   overallProgress: number,
@@ -204,66 +204,54 @@ export async function generateOverallProgressPDF(
 ): Promise<void> {
   const container = createContainer();
   
-  // Split subjects into 2 columns for compact layout
   const midPoint = Math.ceil(subjectProgresses.length / 2);
   const leftSubjects = subjectProgresses.slice(0, midPoint);
   const rightSubjects = subjectProgresses.slice(midPoint);
   
-  const renderSubjectItem = (s: SubjectProgress) => {
+  const renderSubjectSummaryItem = (s: SubjectProgress) => {
     const barColor = s.progress >= 75 ? COLORS.success : s.progress >= 50 ? COLORS.warning : COLORS.primaryLight;
     return `
       <div style="
         display: flex;
         align-items: center;
-        padding: 8px 12px;
+        padding: 10px 14px;
         background: ${COLORS.cardBg};
         border: 1px solid ${COLORS.border};
         border-radius: 6px;
         margin-bottom: 6px;
       ">
-        <span style="${TYPOGRAPHY.small} color: ${COLORS.text}; font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.fullName}</span>
-        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-          ${renderProgressBar(s.progress, "60px", "6px")}
+        <span style="${TYPOGRAPHY.small} color: ${COLORS.text}; font-weight: 500; flex: 1; min-width: 0;">${s.fullName}</span>
+        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+          ${renderProgressBar(s.progress, "70px", "5px")}
           <span style="${TYPOGRAPHY.small} font-weight: 600; color: ${barColor}; min-width: 32px; text-align: right;">${s.progress}%</span>
         </div>
       </div>
     `;
   };
   
-  const leftColumnHTML = leftSubjects.map(renderSubjectItem).join("");
-  const rightColumnHTML = rightSubjects.map(renderSubjectItem).join("");
-  
   container.innerHTML = `
     <div style="font-family: 'Noto Sans Bengali', 'Inter', sans-serif; height: 100%; position: relative;">
       ${renderPageHeader("HSC Science — Overall Progress Report")}
       
-      <div style="margin-bottom: 20px;">
-        <p style="${TYPOGRAPHY.body} color: ${COLORS.textSecondary}; margin: 0;">
-          <strong style="color: ${COLORS.text};">Student:</strong> ${email}
-        </p>
-      </div>
-      
-      <div style="
-        background: ${COLORS.mutedBg};
-        border: 1px solid ${COLORS.border};
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 24px;
-      ">
-        <p style="${TYPOGRAPHY.small} color: ${COLORS.muted}; margin: 0 0 6px 0;">Overall Completion</p>
-        <p style="font-size: 44px; font-weight: 700; color: ${COLORS.primary}; margin: 0 0 12px 0;">${overallProgress}%</p>
-        ${renderProgressBar(overallProgress, "280px", "12px")}
+      <div style="display: flex; gap: 40px; margin-bottom: 24px;">
+        <div>
+          <p style="${TYPOGRAPHY.meta} color: ${COLORS.muted}; margin: 0 0 4px 0;">Student</p>
+          <p style="${TYPOGRAPHY.body} color: ${COLORS.text}; font-weight: 500; margin: 0;">${email}</p>
+        </div>
+        <div>
+          <p style="${TYPOGRAPHY.meta} color: ${COLORS.muted}; margin: 0 0 4px 0;">Overall Progress</p>
+          <p style="font-size: 28px; color: ${COLORS.primary}; font-weight: 700; margin: 0;">${overallProgress}%</p>
+        </div>
       </div>
       
       <div style="margin-bottom: 20px;">
-        <h2 style="${TYPOGRAPHY.h2} color: ${COLORS.text}; margin: 0 0 12px 0;">Subject-wise Progress (${subjectProgresses.length} Subjects)</h2>
+        <h2 style="${TYPOGRAPHY.h2} color: ${COLORS.text}; margin: 0 0 12px 0;">Subject-wise Summary (${subjectProgresses.length} Subjects)</h2>
         <div style="display: flex; gap: ${COLUMN_GAP}px;">
           <div style="flex: 1;">
-            ${leftColumnHTML}
+            ${leftSubjects.map(renderSubjectSummaryItem).join("")}
           </div>
           <div style="flex: 1;">
-            ${rightColumnHTML}
+            ${rightSubjects.map(renderSubjectSummaryItem).join("")}
           </div>
         </div>
       </div>
