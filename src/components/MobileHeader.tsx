@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LogIn, LogOut, Menu } from "lucide-react";
+import { LogIn, LogOut, Menu, Users, Settings } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -92,16 +92,20 @@ export function MobileHeader({ title = "Study Progress" }: MobileHeaderProps) {
                 <p className="text-sm text-foreground truncate">{user.email}</p>
               </div>
             )}
-            <Link to="/downloads" className="block" onClick={() => setMenuOpen(false)}>
+            <Link to="/community" className="block" onClick={() => setMenuOpen(false)}>
               <Button variant="ghost" className="w-full justify-start min-h-[44px]">
-                Downloads
+                <Users className="h-4 w-4 mr-2" />
+                Community
               </Button>
             </Link>
-            <Link to="/about" className="block" onClick={() => setMenuOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start min-h-[44px]">
-                About
-              </Button>
-            </Link>
+            {user && (
+              <Link to="/settings" className="block" onClick={() => setMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start min-h-[44px]">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
+            )}
             {!loading && (
               user ? (
                 <Button 
