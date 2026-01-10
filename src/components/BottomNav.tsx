@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, Download, Shield, CalendarDays, BarChart3, UserCircle, Settings, Users, Sparkles } from "lucide-react";
+import { Home, BookOpen, Download, Shield, CalendarDays, BarChart3, UserCircle, Info, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -10,12 +10,12 @@ const navItems = [
   { path: "/tracker", icon: BookOpen, label: "Tracker" },
   { path: "/overview", icon: BarChart3, label: "Overview" },
   { path: "/ai-analysis", icon: Sparkles, label: "AI" },
-  { path: "/community", icon: Users, label: "Community" },
+  { path: "/downloads", icon: Download, label: "Downloads" },
+  { path: "/about", icon: Info, label: "About" },
   { path: "/planning", icon: CalendarDays, label: "Planning" },
 ];
 
 const authItem = { path: "/auth", icon: UserCircle, label: "Sign Up" };
-const settingsItem = { path: "/settings", icon: Settings, label: "Settings" };
 
 export function BottomNav() {
   const location = useLocation();
@@ -41,11 +41,11 @@ export function BottomNav() {
     checkAdmin();
   }, [user]);
 
-  // Build nav items: add auth if not logged in, add settings if logged in, add admin if admin
+  // Build nav items: add auth if not logged in, add admin if admin
   const allNavItems = [
     ...navItems,
     ...(isAdmin ? [{ path: "/admin", icon: Shield, label: "Admin" }] : []),
-    ...(user ? [settingsItem] : [authItem]),
+    ...(!user ? [authItem] : []),
   ];
 
   return (
