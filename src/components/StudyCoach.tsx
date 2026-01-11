@@ -4,7 +4,10 @@ import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { supabase } from "@/integrations/supabase/client";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { useStudyCoachSettings } from "@/hooks/useStudyCoachSettings";
 import { 
   GraduationCap, 
   Calendar, 
@@ -15,7 +18,9 @@ import {
   Loader2,
   RefreshCw,
   Lightbulb,
-  Flame
+  Flame,
+  Bell,
+  Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -114,12 +119,51 @@ const getTodayActions = (completion: number, monthsRemaining: number, batch: str
 };
 
 export function StudyCoach() {
+  const { user } = useAuth();
+  const { settings, saveSettings, updateNotificationSettings } = useStudyCoachSettings();
+  
   const [step, setStep] = useState<Step>("batch");
   const [batch, setBatch] = useState<"2026" | "2027" | null>(null);
   const [monthsRemaining, setMonthsRemaining] = useState<number>(12);
   const [completion, setCompletion] = useState<number>(30);
   const [result, setResult] = useState<CoachResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [notificationEmail, setNotificationEmail] = useState<string>("");
+  const [isNotificationEnabled, setIsNotificationEnabled] = useState(false);
+
+  // Load saved settings when available
+  useEffect(() => {
+    if (settings) {
+      setBatch(settings.batch as "2026" | "2027");
+      setMonthsRemaining(settings.months_remaining);
+      setCompletion(settings.completion_percentage);
+      setIsNotificationEnabled(settings.notifications_enabled);
+      setNotificationEmail(settings.notification_email || user?.email || "");
+      
+      // If we have saved settings, show the result
+      if (settings.risk_level) {
+        const tone = getTodayTone();
+        const motivationalMessages = getMotivationalMessages(settings.months_remaining, settings.risk_level as RiskLevel, tone);
+        const todayActions = getTodayActions(settings.completion_percentage, settings.months_remaining, settings.batch);
+        
+        let safePercentage: number;
+        if (settings.batch === "2027") {
+          safePercentage = Math.min(80, Math.round((24 - settings.months_remaining) * 3));
+        } else {
+          safePercentage = Math.min(90, Math.round((12 - settings.months_remaining) * 7));
+        }
+        safePercentage = Math.max(0, safePercentage);
+        
+        setResult({
+          safePercentage,
+          riskLevel: settings.risk_level as RiskLevel,
+          motivationalMessages,
+          todayActions
+        });
+        setStep("result");
+      }
+    }
+  }, [settings, user?.email]);
 
   const calculateResult = () => {
     if (!batch) return;
@@ -127,7 +171,7 @@ export function StudyCoach() {
     setIsCalculating(true);
     
     // Simulate calculation delay for UX
-    setTimeout(() => {
+    setTimeout(async () => {
       let safePercentage: number;
       
       if (batch === "2027") {
@@ -159,9 +203,44 @@ export function StudyCoach() {
         todayActions
       });
       
+      // Save settings if user is logged in
+      if (user) {
+        saveSettings.mutate({
+          batch,
+          months_remaining: monthsRemaining,
+          completion_percentage: completion,
+          risk_level: riskLevel,
+          notification_email: notificationEmail || user.email || undefined,
+          notifications_enabled: isNotificationEnabled,
+        });
+      }
+      
       setStep("result");
       setIsCalculating(false);
     }, 500);
+  };
+
+  const handleNotificationToggle = (enabled: boolean) => {
+    setIsNotificationEnabled(enabled);
+    if (user && settings) {
+      updateNotificationSettings.mutate({
+        enabled,
+        email: notificationEmail || user.email || undefined,
+      });
+    }
+  };
+
+  const handleEmailChange = (email: string) => {
+    setNotificationEmail(email);
+  };
+
+  const saveNotificationEmail = () => {
+    if (user && settings && notificationEmail) {
+      updateNotificationSettings.mutate({
+        enabled: isNotificationEnabled,
+        email: notificationEmail,
+      });
+    }
   };
 
   const resetCoach = () => {
@@ -441,6 +520,61 @@ export function StudyCoach() {
               ))}
             </div>
           </Card>
+
+          {/* Notification Settings - Only show for logged in users */}
+          {user && (
+            <Card className="p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Bell className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold">দৈনিক রিমাইন্ডার</h3>
+                  <p className="text-xs text-muted-foreground">প্রতিদিন মোটিভেশন মেসেজ পাও</p>
+                </div>
+                <Switch
+                  checked={isNotificationEnabled}
+                  onCheckedChange={handleNotificationToggle}
+                />
+              </div>
+              
+              {isNotificationEnabled && (
+                <div className="space-y-3 pt-3 border-t">
+                  <div className="space-y-2">
+                    <Label htmlFor="notification-email" className="text-sm flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      ইমেইল ঠিকানা
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="notification-email"
+                        type="email"
+                        value={notificationEmail}
+                        onChange={(e) => handleEmailChange(e.target.value)}
+                        placeholder="তোমার ইমেইল"
+                        className="flex-1"
+                      />
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={saveNotificationEmail}
+                        disabled={!notificationEmail || updateNotificationSettings.isPending}
+                      >
+                        {updateNotificationSettings.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "সংরক্ষণ"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    প্রতিদিন সকালে তোমার ইমেইলে মোটিভেশন মেসেজ ও স্টাডি টিপস পাঠানো হবে।
+                  </p>
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* Reset Button */}
           <Button 

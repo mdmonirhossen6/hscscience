@@ -149,6 +149,51 @@ export type Database = {
         }
         Relationships: []
       }
+      study_coach_settings: {
+        Row: {
+          batch: string
+          completion_percentage: number
+          created_at: string
+          id: string
+          last_notification_sent: string | null
+          months_remaining: number
+          notification_email: string | null
+          notification_time: string
+          notifications_enabled: boolean
+          risk_level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          batch: string
+          completion_percentage: number
+          created_at?: string
+          id?: string
+          last_notification_sent?: string | null
+          months_remaining: number
+          notification_email?: string | null
+          notification_time?: string
+          notifications_enabled?: boolean
+          risk_level: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          batch?: string
+          completion_percentage?: number
+          created_at?: string
+          id?: string
+          last_notification_sent?: string | null
+          months_remaining?: number
+          notification_email?: string | null
+          notification_time?: string
+          notifications_enabled?: boolean
+          risk_level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       study_records: {
         Row: {
           activity: string
