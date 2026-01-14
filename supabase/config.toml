@@ -2,3 +2,6 @@ project_id = "iytammxwlhlrqoagtqtb"
 
 [functions.analyze-progress]
 verify_jwt = false
+
+[functions.study-coach-ai]
+verify_jwt = false
