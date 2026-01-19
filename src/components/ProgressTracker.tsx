@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,10 +101,28 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
 
+  const initializedRef = useRef(false);
+  const recordsRef = useRef<string>("");
+
   useEffect(() => {
+    // Create a stable key from the current records to detect actual changes
+    const statusKey = initialChapters
+      .flatMap((ch) =>
+        ch.activities.map((a) =>
+          a.name === "Total Lec"
+            ? `${ch.name}-TL-${getClassNumber(ch.name)}`
+            : `${ch.name}-${a.name}-${getStatus(ch.name, a.name)}`
+        )
+      )
+      .join("|");
+
+    // Only update if data actually changed
+    if (recordsRef.current === statusKey) return;
+    recordsRef.current = statusKey;
+
     const statuses: Record<string, Status> = {};
     const classNumbers: Record<string, string> = {};
-    
+
     initialChapters.forEach((chapter) => {
       chapter.activities.forEach((activity) => {
         const key = `${chapter.name}-${activity.name}`;
@@ -115,9 +133,10 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
         }
       });
     });
-    
+
     setLocalStatuses(statuses);
     setLocalClassNumbers(classNumbers);
+    initializedRef.current = true;
   }, [initialChapters, getStatus, getClassNumber]);
 
   const cycleStatus = async (chapterName: string, activityName: string) => {
