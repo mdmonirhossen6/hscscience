@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { generateOverallProgressPDF, generateDetailedProgressPDF } from "@/lib/pdfGenerator";
 import { useProgressSnapshot, ALL_SUBJECTS } from "@/hooks/useProgressSnapshot";
+import { useProgressCelebration } from "@/hooks/useProgressCelebration";
+import { ProgressCelebration } from "@/components/ProgressCelebration";
 
 export default function Home() {
   const { user } = useAuth();
-  const { overallProgress, subjects, recordMap } = useProgressSnapshot();
+  const { overallProgress, subjects, recordMap, loading } = useProgressSnapshot();
+  const { celebration, dismissCelebration } = useProgressCelebration(overallProgress, loading);
 
   const handleDownloadOverallPDF = async () => {
     if (!user?.email) return;
@@ -43,6 +46,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0 relative overflow-hidden">
+      {/* Progress Celebration Popup */}
+      {celebration?.shouldCelebrate && (
+        <ProgressCelebration
+          previousProgress={celebration.previousProgress}
+          currentProgress={celebration.currentProgress}
+          onClose={dismissCelebration}
+        />
+      )}
+
       {/* Animated Glow Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Large primary orb - top right */}
