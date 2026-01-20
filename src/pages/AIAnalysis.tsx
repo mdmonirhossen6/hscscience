@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProgressSnapshot } from "@/hooks/useProgressSnapshot";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Loader2, AlertCircle, Clock, GraduationCap, MessageCircle } from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, Clock, GraduationCap, MessageCircle, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { StudyCoach } from "@/components/StudyCoach";
 import { AIChatBox } from "@/components/AIChatBox";
+import { AIStudyAnalyst } from "@/components/AIStudyAnalyst";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const COOLDOWN_KEY = "ai_analysis_last_used";
@@ -135,21 +136,29 @@ export default function AIAnalysis() {
       <MobileHeader title="AI বিশ্লেষণ" />
 
       <main className="px-4 py-6 max-w-2xl mx-auto space-y-6">
-        <Tabs defaultValue="chat" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="chat" className="gap-2">
+        <Tabs defaultValue="analyst" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
+            <TabsTrigger value="analyst" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
+              <ClipboardList className="h-4 w-4" />
+              <span className="hidden sm:inline">Study</span> Analyst
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
               <MessageCircle className="h-4 w-4" />
-              AI Chat
+              <span className="hidden sm:inline">AI</span> Chat
             </TabsTrigger>
-            <TabsTrigger value="coach" className="gap-2">
+            <TabsTrigger value="coach" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
               <GraduationCap className="h-4 w-4" />
-              Study Coach
+              Coach
             </TabsTrigger>
-            <TabsTrigger value="analysis" className="gap-2">
+            <TabsTrigger value="analysis" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
               <Sparkles className="h-4 w-4" />
               Analysis
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="analyst" className="space-y-4">
+            <AIStudyAnalyst />
+          </TabsContent>
 
           <TabsContent value="chat" className="space-y-4">
             <AIChatBox />
