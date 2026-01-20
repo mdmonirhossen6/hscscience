@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader2, Bot, User, Sparkles, BookOpen, Brain, Target, HelpCircle } from "lucide-react";
+import { Send, Loader2, Bot, User, Sparkles, BookOpen, Brain, Target, HelpCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Message = {
   role: "user" | "assistant";
@@ -122,11 +124,72 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export function AIChatBox() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load chat history on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user) {
+        setIsLoadingHistory(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("ai_chat_messages")
+          .select("role, content")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setMessages(data.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })));
+        }
+      } catch (error) {
+        console.error("Failed to load chat history:", error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+  }, [user]);
+
+  // Save message to database
+  const saveMessage = useCallback(async (msg: Message) => {
+    if (!user) return;
+
+    try {
+      await supabase.from("ai_chat_messages").insert({
+        user_id: user.id,
+        role: msg.role,
+        content: msg.content,
+      });
+    } catch (error) {
+      console.error("Failed to save message:", error);
+    }
+  }, [user]);
+
+  // Clear chat history
+  const clearHistory = async () => {
+    if (!user) return;
+
+    try {
+      await supabase.from("ai_chat_messages").delete().eq("user_id", user.id);
+      setMessages([]);
+      toast.success("Chat history cleared");
+    } catch (error) {
+      console.error("Failed to clear history:", error);
+      toast.error("Failed to clear history");
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -141,6 +204,7 @@ export function AIChatBox() {
     setTimeout(() => {
       const userMsg: Message = { role: "user", content: prompt };
       setMessages((prev) => [...prev, userMsg]);
+      saveMessage(userMsg);
       setIsLoading(true);
 
       let assistantContent = "";
@@ -165,6 +229,10 @@ export function AIChatBox() {
           setIsLoading(false);
           setInput("");
           inputRef.current?.focus();
+          // Save assistant message after streaming completes
+          if (assistantContent) {
+            saveMessage({ role: "assistant", content: assistantContent });
+          }
         },
         onError: (error) => {
           toast.error(error);
@@ -181,6 +249,7 @@ export function AIChatBox() {
 
     const userMsg: Message = { role: "user", content: trimmedInput };
     setMessages((prev) => [...prev, userMsg]);
+    saveMessage(userMsg);
     setInput("");
     setIsLoading(true);
 
@@ -205,6 +274,10 @@ export function AIChatBox() {
       onDone: () => {
         setIsLoading(false);
         inputRef.current?.focus();
+        // Save assistant message after streaming completes
+        if (assistantContent) {
+          saveMessage({ role: "assistant", content: assistantContent });
+        }
       },
       onError: (error) => {
         toast.error(error);
@@ -222,17 +295,40 @@ export function AIChatBox() {
     }
   };
 
+  if (isLoadingHistory) {
+    return (
+      <div className="flex flex-col h-[500px] bg-card/50 rounded-xl overflow-hidden border border-border/50">
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[500px] bg-card/50 rounded-xl overflow-hidden border border-border/50">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-card/80">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <Bot className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between p-4 border-b border-border/50 bg-card/80">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Bot className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold">AI Study Assistant</h3>
+            <p className="text-xs text-muted-foreground">Ask anything about your studies</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold">AI Study Assistant</h3>
-          <p className="text-xs text-muted-foreground">Ask anything about your studies</p>
-        </div>
+        {messages.length > 0 && user && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={clearHistory}
+            className="text-muted-foreground hover:text-destructive"
+            title="Clear chat history"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
