@@ -6,6 +6,7 @@ import { LogIn, LogOut, Menu, Users, Settings } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/NotificationBell";
+import { UserProfileDisplay } from "@/components/UserProfileDisplay";
 interface MobileHeaderProps {
   title?: string;
 }
@@ -118,15 +119,18 @@ export function MobileHeader({ title = "Study Progress" }: MobileHeaderProps) {
           <NotificationBell />
           {!loading && (
             user ? (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary hover:shadow-glow-sm transition-all duration-300"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
+              <div className="flex items-center gap-2">
+                <UserProfileDisplay size="sm" showName={false} />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleSignOut}
+                  className="border-primary/30 hover:border-primary hover:bg-primary/10 hover:text-primary hover:shadow-glow-sm transition-all duration-300"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
             ) : (
               <Link to="/auth">
                 <Button 
@@ -147,9 +151,8 @@ export function MobileHeader({ title = "Study Progress" }: MobileHeaderProps) {
         <div className="md:hidden absolute top-14 left-0 right-0 bg-card/95 backdrop-blur-xl border-b border-primary/10 shadow-lg shadow-primary/10">
           <div className="px-4 py-3 space-y-2">
             {!loading && user && (
-              <div className="pb-2 mb-2 border-b border-primary/10">
-                <p className="text-xs text-muted-foreground">Signed in as</p>
-                <p className="text-sm text-foreground truncate">{user.email}</p>
+              <div className="pb-3 mb-2 border-b border-primary/10">
+                <UserProfileDisplay size="md" showName={true} showEmail={true} />
               </div>
             )}
             <Link to="/community" className="block" onClick={() => setMenuOpen(false)}>

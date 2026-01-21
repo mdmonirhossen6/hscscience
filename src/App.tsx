@@ -15,6 +15,7 @@ import MonthlyPlanning from "./pages/MonthlyPlanning";
 import Settings from "./pages/Settings";
 import Community from "./pages/Community";
 import AIAnalysis from "./pages/AIAnalysis";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import { JoinChannelDialog } from "./components/JoinChannelDialog";
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/community" element={<Community />} />
             <Route path="/ai-analysis" element={<AIAnalysis />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
