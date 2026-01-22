@@ -10,7 +10,9 @@ import {
   RotateCcw, 
   ClipboardList,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Share2,
+  Copy
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -518,10 +520,26 @@ export function AIStudyAnalyst() {
             </div>
 
             {phase === "result" && (
-              <div className="flex justify-center pt-4">
-                <Button onClick={resetAnalyst} variant="outline">
+              <div className="flex justify-center gap-2 pt-4">
+                <Button
+                  onClick={() => {
+                    const text = `🎓 AI Study Analysis\n━━━━━━━━━━━━━━━━━\n\n${analysisResult}\n\n━━━━━━━━━━━━━━━━━\nHSC Science Tracker`;
+                    if (navigator.share) {
+                      navigator.share({ title: "AI Study Analysis", text });
+                    } else {
+                      navigator.clipboard.writeText(text);
+                      toast.success("কপি হয়েছে!");
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  শেয়ার করো
+                </Button>
+                <Button onClick={resetAnalyst} variant="outline" size="sm">
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  নতুন বিশ্লেষণ শুরু করো
+                  নতুন বিশ্লেষণ
                 </Button>
               </div>
             )}
