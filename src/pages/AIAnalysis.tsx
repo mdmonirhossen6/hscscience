@@ -6,12 +6,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProgressSnapshot } from "@/hooks/useProgressSnapshot";
 import { useMonthlyPlans } from "@/hooks/useMonthlyPlans";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Loader2, AlertCircle, Clock, GraduationCap, MessageCircle, ClipboardList } from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, Clock, GraduationCap, MessageCircle, ClipboardList, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { StudyCoach } from "@/components/StudyCoach";
 import { AIChatBox } from "@/components/AIChatBox";
 import { AIStudyAnalyst } from "@/components/AIStudyAnalyst";
+import { SharePlanDialog } from "@/components/SharePlanDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { bn } from "date-fns/locale";
@@ -27,6 +28,29 @@ export default function AIAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState<string | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+
+  // Build completed activities map for SharePlanDialog
+  const completedActivitiesMap = useMemo(() => {
+    const map = new Map<string, string[]>();
+    recordMap.forEach((status, key) => {
+      if (status === "Done") {
+        // Key format is "subject-chapter-activity"
+        const parts = key.split("-");
+        if (parts.length >= 3) {
+          const subject = parts[0];
+          const chapter = parts.slice(1, -1).join("-");
+          const activity = parts[parts.length - 1];
+          const mapKey = `${subject}-${chapter}`;
+          if (!map.has(mapKey)) {
+            map.set(mapKey, []);
+          }
+          map.get(mapKey)!.push(activity);
+        }
+      }
+    });
+    return map;
+  }, [recordMap]);
 
   // Calculate monthly plan statistics using recordMap from useProgressSnapshot
   const monthlyPlanData = useMemo(() => {
@@ -217,6 +241,19 @@ export default function AIAnalysis() {
       <MobileHeader title="AI বিশ্লেষণ" />
 
       <main className="px-4 py-6 max-w-2xl mx-auto space-y-6">
+        {/* Share Button */}
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShareDialogOpen(true)}
+            className="gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            শেয়ার করুন
+          </Button>
+        </div>
+
         <Tabs defaultValue="analyst" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="analyst" className="gap-1 text-xs sm:text-sm px-1 sm:px-3">
@@ -356,6 +393,16 @@ export default function AIAnalysis() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Share Dialog */}
+      <SharePlanDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        plans={plans}
+        completedActivitiesMap={completedActivitiesMap}
+        currentMonth={new Date(currentMonth + "-01")}
+        userEmail={user?.email}
+      />
 
       <BottomNav />
     </div>
