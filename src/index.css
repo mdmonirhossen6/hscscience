@@ -602,35 +602,77 @@
   /* Custom scrollbar with neon accent */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+    scrollbar-color: hsl(var(--primary) / 0.4) hsl(var(--muted) / 0.3);
   }
   
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
+    background: hsl(var(--muted) / 0.2);
+    border-radius: 3px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, hsl(var(--primary) / 0.4), hsl(var(--secondary) / 0.4));
+    background: linear-gradient(to bottom, hsl(var(--primary) / 0.5), hsl(var(--secondary) / 0.5));
     border-radius: 3px;
   }
   
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, hsl(var(--primary) / 0.6), hsl(var(--secondary) / 0.6));
+    background: linear-gradient(to bottom, hsl(var(--primary) / 0.7), hsl(var(--secondary) / 0.7));
+  }
+
+  /* Neon glow scrollbar - always visible */
+  .scrollbar-neon {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.6) hsl(var(--muted) / 0.3);
   }
   
-  /* Hide scrollbar on mobile */
-  @media (max-width: 768px) {
-    .scrollbar-thin {
-      scrollbar-width: none;
-    }
-    
-    .scrollbar-thin::-webkit-scrollbar {
-      display: none;
-    }
+  .scrollbar-neon::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-neon::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 4px;
+  }
+  
+  .scrollbar-neon::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
+    border-radius: 4px;
+    box-shadow: 0 0 6px hsl(var(--primary) / 0.4);
+  }
+  
+  .scrollbar-neon::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, hsl(var(--primary) / 0.9), hsl(var(--secondary) / 0.9), hsl(var(--accent) / 0.9));
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.6);
+  }
+
+  /* Purple variant scrollbar */
+  .scrollbar-purple {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--secondary) / 0.6) hsl(var(--muted) / 0.3);
+  }
+  
+  .scrollbar-purple::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-purple::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.2);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-purple::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(var(--secondary) / 0.6), hsl(270 95% 70% / 0.6));
+    border-radius: 3px;
+  }
+  
+  .scrollbar-purple::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, hsl(var(--secondary) / 0.8), hsl(270 95% 70% / 0.8));
   }
   
   /* Backdrop blur utilities */

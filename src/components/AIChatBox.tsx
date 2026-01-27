@@ -657,7 +657,7 @@ export function AIChatBox() {
                 <p className="text-xs text-muted-foreground mt-1">ভালো সাজেশনের জন্য এই প্রশ্নগুলোর উত্তর দাও</p>
               </div>
               
-              <ScrollArea className="max-h-[350px]">
+              <ScrollArea className="max-h-[350px] scrollbar-purple">
                 <div className="p-4 space-y-4">
                   {/* Current Class */}
                   <div className="space-y-2">
@@ -786,7 +786,7 @@ export function AIChatBox() {
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      <ScrollArea className="flex-1 p-4 scrollbar-neon" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-4">
             <Sparkles className="h-10 w-10 mb-3 opacity-30" />
