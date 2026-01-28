@@ -1,6 +1,5 @@
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
+import { AppLayout } from "@/components/AppLayout";
 import { AlertCircle, GraduationCap, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { StudyCoach } from "@/components/StudyCoach";
@@ -13,8 +12,7 @@ export default function AIAnalysis() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-0">
-        <MobileHeader title="AI বিশ্লেষণ" />
+      <AppLayout title="AI বিশ্লেষণ">
         <main className="px-4 py-6 max-w-2xl mx-auto">
           <div className="bg-card/50 rounded-xl p-6 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -27,15 +25,12 @@ export default function AIAnalysis() {
             </Link>
           </div>
         </main>
-        <BottomNav />
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <MobileHeader title="AI বিশ্লেষণ" />
-
+    <AppLayout title="AI বিশ্লেষণ">
       <main className="px-4 py-6 max-w-2xl mx-auto space-y-6">
         <Tabs defaultValue="chat" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -58,8 +53,6 @@ export default function AIAnalysis() {
           </TabsContent>
         </Tabs>
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

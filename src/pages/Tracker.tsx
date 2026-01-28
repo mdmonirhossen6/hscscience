@@ -16,8 +16,7 @@ import { english2ndData } from "@/data/english2ndData";
 import { bangla1stData } from "@/data/bangla1stData";
 import { bangla2ndData } from "@/data/bangla2ndData";
 
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { SubjectProgressBar } from "@/components/SubjectProgressBar";
 import { cn } from "@/lib/utils";
@@ -54,35 +53,33 @@ export default function Tracker() {
   const activeSubject = subjects[activeIndex] || subjects[0];
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      <MobileHeader title={activeSubject.data.name} />
-
-      <main className="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-4 py-4 pb-24 md:pb-8">
+    <AppLayout title={activeSubject.data.name}>
+      <main className="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-4 py-4 pb-8">
         <div className="max-w-5xl mx-auto">
-        {/* Subject Pills - Horizontal scroll */}
-        <div className="mb-4 -mx-4 px-4 md:mx-0 md:px-0">
-          <div className="flex gap-2 overflow-x-auto scroll-smooth-touch pb-2">
-            {subjects.map((subject, index) => {
-              const isActive = index === activeIndex;
-              const Icon = subject.icon;
-              return (
-                <button
-                  key={subject.data.id}
-                  onClick={() => setActiveIndex(index)}
-                  className={cn(
-                    "flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all min-h-[40px]",
-                    isActive 
-                      ? "bg-primary text-primary-foreground" 
-                      : "bg-card/60 text-muted-foreground active:bg-card"
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{subject.label}</span>
-                </button>
-              );
-            })}
+          {/* Subject Pills - Horizontal scroll */}
+          <div className="mb-4 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex gap-2 overflow-x-auto scroll-smooth-touch pb-2">
+              {subjects.map((subject, index) => {
+                const isActive = index === activeIndex;
+                const Icon = subject.icon;
+                return (
+                  <button
+                    key={subject.data.id}
+                    onClick={() => setActiveIndex(index)}
+                    className={cn(
+                      "flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all min-h-[40px]",
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-card/60 text-muted-foreground active:bg-card"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{subject.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
           {/* Subject Progress Bar */}
           <SubjectProgressBar 
@@ -106,8 +103,6 @@ export default function Tracker() {
           </Suspense>
         </div>
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

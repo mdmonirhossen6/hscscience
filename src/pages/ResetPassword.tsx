@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, Loader2, KeyRound } from "lucide-react";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 
 const passwordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -105,7 +105,7 @@ export default function ResetPassword() {
 
   if (!isValidSession) {
     return (
-      <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
+      <AppLayout title="Reset Password">
         <div className="flex-1 flex items-center justify-center px-4 py-8">
           <div className="w-full max-w-sm space-y-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-destructive/10 mb-4">
@@ -120,13 +120,12 @@ export default function ResetPassword() {
             </Button>
           </div>
         </div>
-        <BottomNav />
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
+    <AppLayout title="Reset Password">
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-sm space-y-8">
           {/* Header */}
@@ -193,8 +192,6 @@ export default function ResetPassword() {
           </form>
         </div>
       </div>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

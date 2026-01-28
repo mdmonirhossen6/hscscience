@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { BookOpen, Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 
 const authSchema = z.object({
@@ -158,7 +158,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
+    <AppLayout title="Sign In">
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-sm space-y-8">
           {/* Logo */}
@@ -317,8 +317,6 @@ export default function Auth() {
           )}
         </div>
       </div>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }
