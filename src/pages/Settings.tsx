@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfileSettings, ProfileData } from "@/hooks/useProfileSettings";
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { ProfileCard } from "@/components/settings/ProfileCard";
 import { PersonalInfoSection } from "@/components/settings/PersonalInfoSection";
 import { AcademicInfoSection } from "@/components/settings/AcademicInfoSection";
@@ -63,9 +62,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-24 md:pb-6">
-      <MobileHeader title="Settings" />
-
+    <AppLayout title="Settings">
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -140,8 +137,6 @@ export default function Settings() {
           </div>
         </div>
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

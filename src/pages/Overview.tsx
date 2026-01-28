@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, TrendingUp, BookOpen, CheckCircle2, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -170,9 +169,7 @@ export default function Overview() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <MobileHeader title="Overview" />
-
+    <AppLayout title="Overview">
       <main className="px-4 py-4 max-w-4xl mx-auto">
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -272,8 +269,6 @@ export default function Overview() {
           </>
         )}
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

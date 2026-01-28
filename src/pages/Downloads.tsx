@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, ClipboardList } from "lucide-react";
 import { generateOverallProgressPDF, generateDetailedProgressPDF } from "@/lib/pdfGenerator";
@@ -112,9 +111,7 @@ export default function Downloads() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <MobileHeader title="Downloads" />
-
+    <AppLayout title="Downloads">
       <main className="px-4 py-6 max-w-md mx-auto">
         <p className="text-sm text-muted-foreground mb-6 px-1">
           Download your progress reports as PDF files.
@@ -180,8 +177,6 @@ export default function Downloads() {
           </Card>
         </div>
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

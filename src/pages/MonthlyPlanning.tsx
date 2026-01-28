@@ -4,8 +4,7 @@ import { Download, Calendar, Loader2, ArrowRightLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useMonthlyPlans } from "@/hooks/useMonthlyPlans";
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { MonthSelector } from "@/components/MonthSelector";
 import { MonthlyPlanStats } from "@/components/MonthlyPlanStats";
 import { PlanningChapterCard } from "@/components/PlanningChapterCard";
@@ -144,9 +143,7 @@ export default function MonthlyPlanning() {
   const isLoading = loading || loadingRecords;
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <MobileHeader title="Monthly Planning" />
-
+    <AppLayout title="Monthly Planning">
       <main className="px-4 py-4 max-w-4xl mx-auto">
         {/* Month Selector */}
         <MonthSelector
@@ -353,8 +350,6 @@ export default function MonthlyPlanning() {
           </TabsContent>
         </Tabs>
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

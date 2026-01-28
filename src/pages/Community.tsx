@@ -1,8 +1,7 @@
 import { usePublicProgress } from "@/hooks/usePublicProgress";
 import { ALL_SUBJECTS, useProgressSnapshot } from "@/hooks/useProgressSnapshot";
 import { useAuth } from "@/contexts/AuthContext";
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { CircularProgress } from "@/components/CircularProgress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -144,9 +143,7 @@ export default function Community() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
-      <MobileHeader title="Community" />
-
+    <AppLayout title="Community">
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 space-y-6">
         {/* Hero Header */}
         <div className="glass-card neon-border p-6 relative overflow-hidden">
@@ -406,8 +403,6 @@ export default function Community() {
           </div>
         )}
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }

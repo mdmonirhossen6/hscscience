@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminData } from "@/hooks/useAdminData";
-import { MobileHeader } from "@/components/MobileHeader";
-import { BottomNav } from "@/components/BottomNav";
+import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -64,8 +63,7 @@ export default function Admin() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
-        <MobileHeader />
+      <AppLayout title="Admin">
         <div className="flex-1 flex items-center justify-center px-4">
           <Card className="p-8 text-center max-w-md">
             <Shield className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -75,8 +73,7 @@ export default function Admin() {
             </p>
           </Card>
         </div>
-        <BottomNav />
-      </div>
+      </AppLayout>
     );
   }
 
@@ -111,9 +108,7 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-20 md:pb-0">
-      <MobileHeader />
-      
+    <AppLayout title="Admin">
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -357,8 +352,6 @@ export default function Admin() {
           </div>
         </Card>
       </main>
-
-      <BottomNav />
-    </div>
+    </AppLayout>
   );
 }
