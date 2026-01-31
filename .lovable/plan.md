@@ -1,122 +1,94 @@
 
-# Fix Community Page to Show Email Addresses
+# Fix AI Study Assistant - Rate Limit Issue
 
-## Problem Identified
-The Community/Leaderboard page currently displays user display names or anonymized identifiers (e.g., "Student • ab12"). The user wants email addresses to be visible to everyone on this page.
+## Problem Summary
+The AI Chat is failing because:
+1. **429 Rate Limit errors** from OpenAI API
+2. **169 messages** being sent per request (too large)
+3. OpenAI quota/rate limits are being exceeded
 
-## Current Behavior
-- `usePublicProgress.ts` hook fetches email from profiles table but doesn't expose it
-- Community page displays `displayName` which falls back to "Student • {user_id_prefix}" 
-- The RLS policy on `profiles` table already allows public SELECT (`Anyone can view profiles for public progress`)
+## Recommended Solution: Migrate to Lovable AI + Message Limits
 
-## Solution Overview
+This approach solves both issues: uses the built-in AI gateway (no external API key needed) and limits message history.
 
-### 1. Update the `usePublicProgress` Hook
-**File: `src/hooks/usePublicProgress.ts`**
+---
 
-Add `email` field to the `CommunityUserProgress` interface and include it in the aggregated data:
+## Changes Overview
+
+### 1. Update Edge Function (`supabase/functions/ai-chat/index.ts`)
 
 | Change | Description |
 |--------|-------------|
-| Add `email` to interface | `email?: string \| null` field in `CommunityUserProgress` |
-| Include email in results | Pass email from profile lookup to result objects |
+| Switch API endpoint | Use `https://ai.gateway.lovable.dev/v1/chat/completions` |
+| Use LOVABLE_API_KEY | Already configured, no setup needed |
+| Add message truncation | Limit to last 20 messages to avoid token overflow |
+| Update model | Use `google/gemini-3-flash-preview` (fast, efficient) |
 
-### 2. Update the Community Page UI  
-**File: `src/pages/Community.tsx`**
-
-Display email address alongside or below the display name in:
-- Top 3 students section
-- All students list
-- Expanded user details
-
-| Section | Change |
-|---------|--------|
-| Top 3 Cards | Show email below name in muted text |
-| All Students List | Show email as secondary text line |
-| Merged Progress | Include email from usePublicProgress |
-
-## Technical Implementation
-
-### usePublicProgress.ts Changes
-
+**Key code changes:**
 ```typescript
-// Update interface
-export interface CommunityUserProgress {
-  profileId: string;
-  displayName: string;
-  email: string | null;  // ADD THIS
-  overallProgress: number;
-  subjects: Record<string, number>;
-  lastUpdated: string | null;
-}
+// Before
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+  body: JSON.stringify({ model: "gpt-4o-mini", messages: [...] })
+});
 
-// In aggregatedProgress calculation
-results.push({
-  profileId: userId,
-  displayName,
-  email: profile?.email || null,  // ADD THIS
-  overallProgress,
-  subjects,
-  lastUpdated,
+// After
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+// Truncate messages to last 20 to prevent token overflow
+const truncatedMessages = messages.slice(-20);
+const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  headers: { Authorization: `Bearer ${LOVABLE_API_KEY}` },
+  body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: [...] })
 });
 ```
 
-### Community.tsx UI Changes
+### 2. Update Frontend Error Handling (`src/components/AIChatBox.tsx`)
 
-```tsx
-// In Top 3 section
-<div className="flex-1 min-w-0">
-  <p className="font-medium truncate">
-    {isMe ? `${entry.displayName} (You)` : entry.displayName}
-  </p>
-  {entry.email && (
-    <p className="text-xs text-muted-foreground truncate">
-      {entry.email}
-    </p>
-  )}
-</div>
+Add user-friendly error messages for rate limits:
+- Show toast notification when rate limited
+- Suggest clearing chat history if messages are too many
+- Add "Clear old messages" option
 
-// In All Students list
-<div className="flex-1 min-w-0 text-left">
-  <p className="font-medium truncate">
-    {isMe ? `${u.displayName} (You)` : u.displayName}
-  </p>
-  {u.email && (
-    <p className="text-xs text-muted-foreground truncate">
-      {u.email}
-    </p>
-  )}
-</div>
-```
+---
 
-### 3. Update Merged Progress Logic
-**File: `src/pages/Community.tsx`**
+## Technical Details
 
-The `mergedProgress` useMemo needs to include email for the current user:
-
+### Message Truncation Strategy
 ```typescript
-const myEntry = {
-  profileId: user.id,
-  displayName: existingProfile?.displayName || "You",
-  email: user.email || null,  // ADD THIS
-  overallProgress: mySnapshot.overallProgress,
-  subjects: mySubjects,
-  lastUpdated: new Date().toISOString(),
-};
+// Keep system prompt + last 20 user/assistant messages
+const MAX_MESSAGES = 20;
+const truncatedMessages = transformedMessages.length > MAX_MESSAGES 
+  ? transformedMessages.slice(-MAX_MESSAGES)
+  : transformedMessages;
 ```
+
+### Updated Error Responses
+```typescript
+if (response.status === 429) {
+  return new Response(
+    JSON.stringify({ 
+      error: "Too many requests. Please wait a moment and try again.",
+      shouldClearHistory: transformedMessages.length > 50
+    }),
+    { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+```
+
+---
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/hooks/usePublicProgress.ts` | Add email to interface and include in results |
-| `src/pages/Community.tsx` | Display email in UI, update mergedProgress |
+| `supabase/functions/ai-chat/index.ts` | Switch to Lovable AI, add message truncation, update model |
+| `src/components/AIChatBox.tsx` | Better error handling, suggest clearing history |
 
-## Privacy Consideration
-**Note**: Showing email addresses publicly may raise privacy concerns. The user has confirmed they want emails visible to everyone. If privacy becomes a concern later, this can be changed to admin-only visibility.
+---
 
-## Expected Result
-- All users on the Community/Leaderboard page will show their email address
-- Email appears as secondary text below the display name
-- Emails are truncated if too long to prevent layout issues
-- Current user's email is included when they appear on the leaderboard
+## Expected Results
+- AI Chat will work reliably without rate limit errors
+- Uses built-in Lovable AI (no external API key dependencies)
+- Message history is automatically truncated to prevent overflows
+- Better error messages guide users when issues occur
