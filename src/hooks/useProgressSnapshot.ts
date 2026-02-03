@@ -143,11 +143,19 @@ export const useProgressSnapshot = (): ProgressSnapshot => {
     queryKey,
     enabled: !!user,
     queryFn: async () => {
-      const { data: records } = await supabase
+      // Fetch all records without limit (Supabase default limit is 1000)
+      // Users with many records need all data for accurate progress calculation
+      const { data: records, error } = await supabase
         .from("study_records")
         .select("subject, chapter, activity, status")
         .eq("user_id", user!.id)
-        .eq("type", "status");
+        .eq("type", "status")
+        .limit(5000); // Increase limit to handle users with many records
+
+      if (error) {
+        console.error("Error fetching study records:", error);
+        return new Map<string, string>();
+      }
 
       const recordMap = new Map<string, string>();
       records?.forEach((r) => {
