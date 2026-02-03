@@ -90,7 +90,7 @@ interface ProgressTrackerProps {
 
 export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerProps) => {
   const { user } = useAuth();
-  const { loading, saveStatus, saveClassNumber, markAllChapterActivitiesDone, getStatus, getClassNumber } = useStudyRecords(subjectId);
+  const { loading, saveStatus, saveClassNumber, markAllChapterActivitiesDone, resetAllChapterActivities, getStatus, getClassNumber } = useStudyRecords(subjectId);
   const { getResource, saveResource, deleteResource, loading: resourcesLoading } = useChapterResources(subjectId);
   const { isChapterCompleted, markChapterCompleted, loading: completionsLoading } = useChapterCompletions();
   
@@ -262,11 +262,14 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
 
   const handleToggleComplete = async (chapter: Chapter) => {
     const isCompleted = isChapterCompleted(subjectId, chapter.name);
+    const activityNames = chapter.activities.map(a => a.name);
     
     if (!isCompleted) {
-      // When marking as complete, also mark all activities as Done
-      const activityNames = chapter.activities.map(a => a.name);
+      // When marking as complete, mark all activities as Done
       await markAllChapterActivitiesDone(chapter.name, activityNames);
+    } else {
+      // When unchecking, reset all activities to 0%
+      await resetAllChapterActivities(chapter.name, activityNames);
     }
     
     await markChapterCompleted(subjectId, chapter.name, !isCompleted);

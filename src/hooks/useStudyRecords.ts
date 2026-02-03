@@ -285,6 +285,34 @@ export const useStudyRecords = (subjectId: string) => {
     [user, subjectId, refetch]
   );
 
+  // Reset all activities in a chapter to Not Started (0%)
+  const resetAllChapterActivities = useCallback(
+    async (chapterName: string, activities: string[]) => {
+      if (!user) return;
+      
+      const activitiesToReset = activities.filter(a => a !== "Total Lec");
+      
+      // Delete all status records for this chapter to reset to 0%
+      const { error } = await supabase
+        .from("study_records")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("subject", subjectId)
+        .eq("chapter", chapterName)
+        .eq("type", "status")
+        .in("activity", activitiesToReset);
+      
+      if (error) {
+        console.error("Failed to reset activities:", error);
+        return;
+      }
+      
+      // Refetch to update local state
+      await refetch();
+    },
+    [user, subjectId, refetch]
+  );
+
   const getStatus = useCallback(
     (chapter: string, activity: string): Status => {
       const record = records.find(
@@ -311,6 +339,7 @@ export const useStudyRecords = (subjectId: string) => {
     saveStatus,
     saveClassNumber,
     markAllChapterActivitiesDone,
+    resetAllChapterActivities,
     getStatus,
     getClassNumber,
     refetch,

@@ -92,15 +92,31 @@ export const SubjectProgressBar = ({
         if (error) {
           console.error("Failed to mark all activities done:", error);
           toast.error("Failed to mark all as complete");
+          setIsMarkingAll(false);
+          return;
+        }
+      } else {
+        // Reset all activities to 0% by deleting status records
+        const { error } = await supabase
+          .from("study_records")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("subject", subjectId)
+          .eq("type", "status");
+        
+        if (error) {
+          console.error("Failed to reset activities:", error);
+          toast.error("Failed to reset progress");
+          setIsMarkingAll(false);
           return;
         }
       }
       
-      // Mark all chapters as completed
+      // Mark all chapters as completed/uncompleted
       await markAllSubjectChaptersCompleted(subjectId, chapterNames, !allCompleted);
       await refetch();
       
-      toast.success(allCompleted ? "সব চ্যাপ্টার আনমার্ক করা হয়েছে" : "সব চ্যাপ্টার সম্পন্ন!");
+      toast.success(allCompleted ? "সব চ্যাপ্টার রিসেট হয়েছে (0%)" : "সব চ্যাপ্টার সম্পন্ন (100%)!");
     } catch (error) {
       console.error("Error marking all complete:", error);
       toast.error("Failed to update");
