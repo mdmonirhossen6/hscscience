@@ -90,7 +90,7 @@ interface ProgressTrackerProps {
 
 export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerProps) => {
   const { user } = useAuth();
-  const { loading, saveStatus, saveClassNumber, getStatus, getClassNumber } = useStudyRecords(subjectId);
+  const { loading, saveStatus, saveClassNumber, markAllChapterActivitiesDone, getStatus, getClassNumber } = useStudyRecords(subjectId);
   const { getResource, saveResource, deleteResource, loading: resourcesLoading } = useChapterResources(subjectId);
   const { isChapterCompleted, markChapterCompleted, loading: completionsLoading } = useChapterCompletions();
   
@@ -260,9 +260,16 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
     setResourceModalOpen(true);
   };
 
-  const handleToggleComplete = async (chapterName: string) => {
-    const isCompleted = isChapterCompleted(subjectId, chapterName);
-    await markChapterCompleted(subjectId, chapterName, !isCompleted);
+  const handleToggleComplete = async (chapter: Chapter) => {
+    const isCompleted = isChapterCompleted(subjectId, chapter.name);
+    
+    if (!isCompleted) {
+      // When marking as complete, also mark all activities as Done
+      const activityNames = chapter.activities.map(a => a.name);
+      await markAllChapterActivitiesDone(chapter.name, activityNames);
+    }
+    
+    await markChapterCompleted(subjectId, chapter.name, !isCompleted);
   };
 
   const selectedResource = selectedChapter ? getResource(subjectId, selectedChapter) : null;
@@ -309,7 +316,7 @@ export const ProgressTracker = ({ initialChapters, subjectId }: ProgressTrackerP
                         className="flex-shrink-0 p-1 -m-1"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleToggleComplete(chapter.name);
+                          handleToggleComplete(chapter);
                         }}
                       >
                         {completed ? (

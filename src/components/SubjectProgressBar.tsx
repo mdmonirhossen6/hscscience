@@ -1,12 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStudyRecords } from "@/hooks/useStudyRecords";
+import { useChapterCompletions } from "@/hooks/useChapterCompletions";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSubjectConfig } from "@/config/activityWeights";
 import { normalizeActivity } from "@/config/activityMapping";
 import { Chapter } from "@/types/tracker";
 import { cn } from "@/lib/utils";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, CheckSquare, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SubjectProgressBarProps {
   subjectId: string;
@@ -35,6 +38,76 @@ export const SubjectProgressBar = ({
 }: SubjectProgressBarProps) => {
   const { user } = useAuth();
   const { loading, getStatus, refetch } = useStudyRecords(subjectId);
+  const { areAllChaptersCompleted, markAllSubjectChaptersCompleted } = useChapterCompletions();
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
+
+  const chapterNames = useMemo(() => chapters.map(c => c.name), [chapters]);
+  const allCompleted = useMemo(() => 
+    areAllChaptersCompleted(subjectId, chapterNames), 
+    [areAllChaptersCompleted, subjectId, chapterNames]
+  );
+
+  const handleMarkAllComplete = async () => {
+    if (!user || isMarkingAll) return;
+    
+    setIsMarkingAll(true);
+    try {
+      const nowIso = new Date().toISOString();
+      
+      if (!allCompleted) {
+        // Mark all activities as Done for all chapters
+        const allActivities: Array<{
+          user_id: string;
+          subject: string;
+          chapter: string;
+          activity: string;
+          type: "status";
+          status: "Done";
+          updated_at: string;
+        }> = [];
+        
+        chapters.forEach(chapter => {
+          chapter.activities.forEach(activity => {
+            if (activity.name !== "Total Lec") {
+              allActivities.push({
+                user_id: user.id,
+                subject: subjectId,
+                chapter: chapter.name,
+                activity: activity.name,
+                type: "status",
+                status: "Done",
+                updated_at: nowIso,
+              });
+            }
+          });
+        });
+        
+        const { error } = await supabase
+          .from("study_records")
+          .upsert(allActivities, { 
+            onConflict: "user_id,subject,chapter,activity,type",
+            ignoreDuplicates: false 
+          });
+        
+        if (error) {
+          console.error("Failed to mark all activities done:", error);
+          toast.error("Failed to mark all as complete");
+          return;
+        }
+      }
+      
+      // Mark all chapters as completed
+      await markAllSubjectChaptersCompleted(subjectId, chapterNames, !allCompleted);
+      await refetch();
+      
+      toast.success(allCompleted ? "সব চ্যাপ্টার আনমার্ক করা হয়েছে" : "সব চ্যাপ্টার সম্পন্ন!");
+    } catch (error) {
+      console.error("Error marking all complete:", error);
+      toast.error("Failed to update");
+    } finally {
+      setIsMarkingAll(false);
+    }
+  };
 
   const overallProgress = useMemo(() => {
     if (!user || loading) return 0;
@@ -109,6 +182,21 @@ export const SubjectProgressBar = ({
     <div className={cn("bg-card/60 rounded-xl p-4 mb-4 border-2", getBorderColorClass(color))}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
+          {/* Subject-level complete checkbox */}
+          <button
+            type="button"
+            className="flex-shrink-0 p-1 -m-1 transition-opacity"
+            onClick={handleMarkAllComplete}
+            disabled={isMarkingAll}
+          >
+            {isMarkingAll ? (
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            ) : allCompleted ? (
+              <CheckSquare className="h-5 w-5 text-success" />
+            ) : (
+              <Square className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+            )}
+          </button>
           <h2 className="font-semibold text-foreground">{subjectName} Progress</h2>
           <Button
             variant="ghost"
