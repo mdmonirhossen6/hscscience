@@ -85,6 +85,36 @@ export const useChapterCompletions = () => {
     }
   };
 
+  // Mark all chapters in a subject as completed
+  const markAllSubjectChaptersCompleted = async (subject: string, chapters: string[], completed: boolean) => {
+    if (!user) return;
+
+    const completedAt = completed ? new Date().toISOString() : null;
+    
+    const upsertData = chapters.map(chapter => ({
+      user_id: user.id,
+      subject,
+      chapter,
+      completed,
+      completed_at: completedAt,
+    }));
+
+    const { error } = await supabase
+      .from("chapter_completions")
+      .upsert(upsertData, { onConflict: "user_id,subject,chapter" });
+
+    if (!error) {
+      fetchCompletions();
+    }
+  };
+
+  // Check if all chapters in a subject are completed
+  const areAllChaptersCompleted = (subject: string, chapters: string[]) => {
+    return chapters.every(chapter => 
+      completions.some(c => c.subject === subject && c.chapter === chapter && c.completed)
+    );
+  };
+
   const getMonthlyCompletions = useCallback(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -110,6 +140,8 @@ export const useChapterCompletions = () => {
     completions,
     loading,
     markChapterCompleted,
+    markAllSubjectChaptersCompleted,
+    areAllChaptersCompleted,
     getMonthlyCompletions,
     isChapterCompleted,
     refetch: fetchCompletions,

@@ -248,6 +248,43 @@ export const useStudyRecords = (subjectId: string) => {
     [user, saveClassNumberMutation]
   );
 
+  // Mark all activities in a chapter as Done
+  const markAllChapterActivitiesDone = useCallback(
+    async (chapterName: string, activities: string[]) => {
+      if (!user) return;
+      
+      const nowIso = new Date().toISOString();
+      const activitiesToUpdate = activities.filter(a => a !== "Total Lec");
+      
+      // Batch upsert all activities as Done
+      const upsertData = activitiesToUpdate.map(activity => ({
+        user_id: user.id,
+        subject: subjectId,
+        chapter: chapterName,
+        activity,
+        type: "status" as const,
+        status: "Done" as Status,
+        updated_at: nowIso,
+      }));
+      
+      const { error } = await supabase
+        .from("study_records")
+        .upsert(upsertData, { 
+          onConflict: "user_id,subject,chapter,activity,type",
+          ignoreDuplicates: false 
+        });
+      
+      if (error) {
+        console.error("Failed to mark all activities done:", error);
+        return;
+      }
+      
+      // Refetch to update local state
+      await refetch();
+    },
+    [user, subjectId, refetch]
+  );
+
   const getStatus = useCallback(
     (chapter: string, activity: string): Status => {
       const record = records.find(
@@ -273,6 +310,7 @@ export const useStudyRecords = (subjectId: string) => {
     loading: isLoading || isFetching,
     saveStatus,
     saveClassNumber,
+    markAllChapterActivitiesDone,
     getStatus,
     getClassNumber,
     refetch,
