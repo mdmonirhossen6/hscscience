@@ -28,13 +28,15 @@ export interface StrengthWeaknessItem {
   color: string;
 }
 
-// Only science subjects (9 subjects)
-const SCIENCE_SUBJECT_IDS = [
+// All subject IDs (13 subjects)
+const ALL_SUBJECT_IDS = [
   "physics", "physics2nd",
   "chemistry", "chemistry2nd", 
   "highermath", "highermath2nd",
   "biology", "biology2nd",
-  "ict"
+  "ict",
+  "english1st", "english2nd",
+  "bangla1st", "bangla2nd"
 ];
 
 // Activities to track (excluding Total Lec which is numeric input)
@@ -57,15 +59,15 @@ export const useSubjectAnalytics = () => {
   const activityProgressList = useMemo<ActivityProgress[]>(() => {
     const result: ActivityProgress[] = [];
 
-    // Filter to only science subjects
-    const scienceSubjects = ALL_SUBJECTS.filter(s => SCIENCE_SUBJECT_IDS.includes(s.data.id));
+    // Include all subjects
+    const allSubjects = ALL_SUBJECTS.filter(s => ALL_SUBJECT_IDS.includes(s.data.id));
 
-    scienceSubjects.forEach(({ data: subject, color, displayName }) => {
+    allSubjects.forEach(({ data: subject, color, displayName }) => {
       // Get unique activities from the subject's chapters
       const subjectActivities = new Set<string>();
       subject.chapters.forEach(chapter => {
         chapter.activities.forEach(activity => {
-          if (activity.name !== "Total Lec" && TRACKED_ACTIVITIES.includes(activity.name)) {
+          if (activity.name !== "Total Lec") {
             subjectActivities.add(activity.name);
           }
         });
@@ -109,10 +111,10 @@ export const useSubjectAnalytics = () => {
   const subjectBreakdowns = useMemo<SubjectActivityBreakdown[]>(() => {
     const breakdownMap = new Map<string, SubjectActivityBreakdown>();
 
-    // Filter to only science subjects
-    const scienceSubjects = ALL_SUBJECTS.filter(s => SCIENCE_SUBJECT_IDS.includes(s.data.id));
+    // Include all subjects
+    const allSubjects = ALL_SUBJECTS.filter(s => ALL_SUBJECT_IDS.includes(s.data.id));
 
-    scienceSubjects.forEach(({ data: subject, color, displayName }) => {
+    allSubjects.forEach(({ data: subject, color, displayName }) => {
       breakdownMap.set(subject.id, {
         subjectId: subject.id,
         subjectName: displayName,

@@ -6,6 +6,7 @@ interface SubjectBreakdownChartProps {
 
 // Activity colors - matching the tracker feel
 const activityColors: Record<string, string> = {
+  // Science subjects
   "Lecture": "hsl(217 91% 60%)",       // Blue
   "ক": "hsl(142 76% 45%)",             // Green
   "খ": "hsl(142 71% 55%)",             // Light Green
@@ -16,6 +17,35 @@ const activityColors: Record<string, string> = {
   "Written CQ": "hsl(340 82% 52%)",    // Pink
   "Revision": "hsl(262 83% 58%)",      // Purple
   "Exam": "hsl(280 70% 55%)",          // Violet
+  // English activities
+  "SQ": "hsl(199 89% 48%)",
+  "Info Transfer": "hsl(45 93% 47%)",
+  "Vocabulary": "hsl(35 90% 50%)",
+  "Practice": "hsl(142 76% 45%)",
+  "Model Answers": "hsl(25 95% 53%)",
+  "Error Analysis": "hsl(340 82% 52%)",
+  "Mock Practice": "hsl(262 83% 58%)",
+  "Practice Drafts": "hsl(142 71% 55%)",
+  "Model Review": "hsl(217 91% 60%)",
+  "Final Draft": "hsl(280 70% 55%)",
+  "Practice Sets": "hsl(142 76% 45%)",
+  "Error Log": "hsl(340 82% 52%)",
+  "Final Practice": "hsl(262 83% 58%)",
+  "Model Samples": "hsl(25 95% 53%)",
+  "Expressions": "hsl(35 90% 50%)",
+  "Idea Planning": "hsl(199 89% 48%)",
+  "Practice Writing": "hsl(142 71% 55%)",
+  "Model Reading": "hsl(217 91% 60%)",
+  // Bangla activities
+  "Text Reading": "hsl(199 89% 48%)",
+  "Poem Reading": "hsl(262 83% 58%)",
+  "Chapter Reading": "hsl(142 76% 45%)",
+  "CQ Practice": "hsl(25 95% 53%)",
+  "Theme": "hsl(280 70% 55%)",
+  "Rule Notes": "hsl(199 89% 48%)",
+  "Format Templates": "hsl(142 71% 55%)",
+  "Outline": "hsl(217 91% 60%)",
+  "Model Essays": "hsl(25 95% 53%)",
 };
 
 const getActivityColor = (name: string) => activityColors[name] || "hsl(var(--primary))";
