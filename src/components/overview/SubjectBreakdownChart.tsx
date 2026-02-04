@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { SubjectActivityBreakdown } from "@/hooks/useSubjectAnalytics";
 
 interface SubjectBreakdownChartProps {
   breakdown: SubjectActivityBreakdown;
+  tabIndex: number;
 }
 
 // Shorten activity names for x-axis
@@ -50,7 +52,8 @@ const shortNames: Record<string, string> = {
 
 const getShortName = (name: string) => shortNames[name] || name.slice(0, 5);
 
-export const SubjectBreakdownChart = ({ breakdown }: SubjectBreakdownChartProps) => {
+export const SubjectBreakdownChart = ({ breakdown, tabIndex }: SubjectBreakdownChartProps) => {
+  const navigate = useNavigate();
   // Prepare data for line chart
   const chartData = breakdown.activities.map((item) => ({
     name: getShortName(item.name),
@@ -58,8 +61,13 @@ export const SubjectBreakdownChart = ({ breakdown }: SubjectBreakdownChartProps)
     value: item.percentage,
   }));
 
+  const handleClick = () => {
+    navigate(`/tracker?tab=${tabIndex}`);
+  };
+
   return (
     <div 
+      onClick={handleClick}
       className="bg-card/60 rounded-xl p-4 border border-border/50 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group"
       style={{ 
         "--subject-color": breakdown.subjectColor 
