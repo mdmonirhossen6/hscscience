@@ -1,92 +1,125 @@
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { SubjectActivityBreakdown } from "@/hooks/useSubjectAnalytics";
 
 interface SubjectBreakdownChartProps {
   breakdown: SubjectActivityBreakdown;
 }
 
-// Activity colors - matching the tracker feel
-const activityColors: Record<string, string> = {
-  // Science subjects
-  "Lecture": "hsl(217 91% 60%)",       // Blue
-  "ক": "hsl(142 76% 45%)",             // Green
-  "খ": "hsl(142 71% 55%)",             // Light Green
-  "Notes": "hsl(199 89% 48%)",         // Cyan
-  "MCQ Practice": "hsl(45 93% 47%)",   // Yellow
-  "MCQ Summary": "hsl(35 90% 50%)",    // Orange-Yellow
-  "CQ Summary": "hsl(25 95% 53%)",     // Orange
-  "Written CQ": "hsl(340 82% 52%)",    // Pink
-  "Revision": "hsl(262 83% 58%)",      // Purple
-  "Exam": "hsl(280 70% 55%)",          // Violet
-  // English activities
-  "SQ": "hsl(199 89% 48%)",
-  "Info Transfer": "hsl(45 93% 47%)",
-  "Vocabulary": "hsl(35 90% 50%)",
-  "Practice": "hsl(142 76% 45%)",
-  "Model Answers": "hsl(25 95% 53%)",
-  "Error Analysis": "hsl(340 82% 52%)",
-  "Mock Practice": "hsl(262 83% 58%)",
-  "Practice Drafts": "hsl(142 71% 55%)",
-  "Model Review": "hsl(217 91% 60%)",
-  "Final Draft": "hsl(280 70% 55%)",
-  "Practice Sets": "hsl(142 76% 45%)",
-  "Error Log": "hsl(340 82% 52%)",
-  "Final Practice": "hsl(262 83% 58%)",
-  "Model Samples": "hsl(25 95% 53%)",
-  "Expressions": "hsl(35 90% 50%)",
-  "Idea Planning": "hsl(199 89% 48%)",
-  "Practice Writing": "hsl(142 71% 55%)",
-  "Model Reading": "hsl(217 91% 60%)",
-  // Bangla activities
-  "Text Reading": "hsl(199 89% 48%)",
-  "Poem Reading": "hsl(262 83% 58%)",
-  "Chapter Reading": "hsl(142 76% 45%)",
-  "CQ Practice": "hsl(25 95% 53%)",
-  "Theme": "hsl(280 70% 55%)",
-  "Rule Notes": "hsl(199 89% 48%)",
-  "Format Templates": "hsl(142 71% 55%)",
-  "Outline": "hsl(217 91% 60%)",
-  "Model Essays": "hsl(25 95% 53%)",
+// Shorten activity names for x-axis
+const shortNames: Record<string, string> = {
+  "Lecture": "Class",
+  "ক": "ক",
+  "খ": "খ",
+  "Notes": "Note",
+  "MCQ Practice": "MCQ",
+  "MCQ Summary": "MCQ S",
+  "CQ Summary": "CQ S",
+  "Written CQ": "CQ",
+  "Revision": "Rev",
+  "Exam": "Exam",
+  // English
+  "SQ": "SQ",
+  "Info Transfer": "Info",
+  "Vocabulary": "Vocab",
+  "Practice": "Prac",
+  "Model Answers": "Model",
+  "Error Analysis": "Error",
+  "Mock Practice": "Mock",
+  "Practice Drafts": "Draft",
+  "Model Review": "Review",
+  "Final Draft": "Final",
+  "Practice Sets": "Prac",
+  "Error Log": "Error",
+  "Final Practice": "Final",
+  "Model Samples": "Sample",
+  "Expressions": "Expr",
+  "Idea Planning": "Idea",
+  "Practice Writing": "Write",
+  "Model Reading": "Read",
+  // Bangla
+  "Text Reading": "Text",
+  "Poem Reading": "Poem",
+  "Chapter Reading": "Chap",
+  "CQ Practice": "CQ",
+  "Theme": "Theme",
+  "Rule Notes": "Rule",
+  "Format Templates": "Format",
+  "Outline": "Outline",
+  "Model Essays": "Essay",
 };
 
-const getActivityColor = (name: string) => activityColors[name] || "hsl(var(--primary))";
+const getShortName = (name: string) => shortNames[name] || name.slice(0, 5);
 
 export const SubjectBreakdownChart = ({ breakdown }: SubjectBreakdownChartProps) => {
+  // Prepare data for line chart
+  const chartData = breakdown.activities.map((item) => ({
+    name: getShortName(item.name),
+    fullName: item.name,
+    value: item.percentage,
+  }));
+
   return (
     <div className="bg-card/60 rounded-xl p-4 border border-border/50 backdrop-blur-sm">
-      <div className="flex items-center gap-2 mb-4">
-        <div 
-          className="w-3 h-3 rounded-full shrink-0"
-          style={{ backgroundColor: breakdown.subjectColor }}
-        />
-        <h4 className="font-medium text-foreground text-sm truncate">
-          {breakdown.subjectName}
-        </h4>
-      </div>
+      <h4 className="font-medium text-foreground text-sm mb-3 truncate">
+        {breakdown.subjectName}
+      </h4>
       
-      <div className="space-y-2.5">
-        {breakdown.activities.map((item) => {
-          const color = getActivityColor(item.name);
-          return (
-            <div key={item.name} className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground truncate max-w-[60%]">{item.name}</span>
-                <span className="text-xs font-medium text-muted-foreground">{item.percentage}%</span>
-              </div>
-              <div 
-                className="h-2 rounded-full overflow-hidden"
-                style={{ backgroundColor: `${color}20` }}
-              >
-                <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
-                  style={{ 
-                    width: `${item.percentage}%`,
-                    backgroundColor: color,
-                  }}
-                />
-              </div>
-            </div>
-          );
-        })}
+      <div className="h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
+              tickLine={false}
+              interval={0}
+              angle={-45}
+              textAnchor="end"
+              height={45}
+            />
+            <YAxis 
+              domain={[0, 100]}
+              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              axisLine={{ stroke: "hsl(var(--border))" }}
+              tickLine={false}
+              ticks={[0, 20, 40, 60, 80, 100]}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const data = payload[0].payload;
+                  return (
+                    <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-xl">
+                      <p className="text-sm font-medium text-foreground">{data.fullName}</p>
+                      <p className="text-xs text-muted-foreground">{data.value}%</p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="value" 
+              stroke={breakdown.subjectColor}
+              strokeWidth={2}
+              dot={{ 
+                fill: breakdown.subjectColor, 
+                strokeWidth: 2,
+                r: 4,
+                stroke: breakdown.subjectColor
+              }}
+              activeDot={{ 
+                r: 6, 
+                fill: breakdown.subjectColor,
+                stroke: "hsl(var(--background))",
+                strokeWidth: 2
+              }}
+              animationDuration={800}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
