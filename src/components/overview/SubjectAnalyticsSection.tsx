@@ -42,7 +42,7 @@ export const SubjectAnalyticsSection = () => {
       </div>
 
       {/* Subject-wise Charts Section */}
-      <div>
+      <div data-section="subject-breakdown">
         <div className="flex items-center gap-2 mb-3">
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
