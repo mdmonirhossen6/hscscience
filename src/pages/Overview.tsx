@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, TrendingUp, BookOpen, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, TrendingUp, BookOpen, CheckCircle2, Clock, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Progress } from "@/components/ui/progress";
-import { SubjectAnalyticsSection } from "@/components/overview/SubjectAnalyticsSection";
+import { SubjectAnalyticsSection, PerformanceStatsRow } from "@/components/overview/SubjectAnalyticsSection";
 import { cn } from "@/lib/utils";
 
 import { physicsData } from "@/data/physicsData";
@@ -178,6 +178,17 @@ export default function Overview() {
           </div>
         ) : (
           <>
+            {/* Performance Analysis - At Top */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Activity className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Performance Analysis
+                </h3>
+              </div>
+              <PerformanceStatsRow />
+            </div>
+
             {/* Overall Progress Card */}
             <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-background rounded-2xl p-6 mb-6 border border-primary/20">
               <div className="flex items-center gap-3 mb-4">
@@ -228,7 +239,7 @@ export default function Overview() {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Subject Breakdown
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-3 mb-8">
               {subjectProgress.map((subject, index) => (
                 <button
                   key={subject.id}
@@ -268,10 +279,8 @@ export default function Overview() {
               ))}
             </div>
 
-            {/* Subject Analytics Section */}
-            <div className="mt-8">
-              <SubjectAnalyticsSection />
-            </div>
+            {/* Subject-wise Breakdown Charts - At Bottom */}
+            <SubjectAnalyticsSection />
           </>
         )}
       </main>

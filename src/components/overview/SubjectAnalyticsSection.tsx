@@ -20,6 +20,9 @@ const subjectTabIndex: Record<string, number> = {
   "bangla2nd": 12,
 };
 
+// Export PerformanceStatsRow separately for use in Overview page
+export { PerformanceStatsRow };
+
 export const SubjectAnalyticsSection = () => {
   const { subjectBreakdowns, loading } = useSubjectAnalytics();
 
@@ -32,32 +35,21 @@ export const SubjectAnalyticsSection = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Performance Stats Row */}
-      <div>
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-          Performance Analysis
+    <div data-section="subject-breakdown">
+      <div className="flex items-center gap-2 mb-3">
+        <BarChart3 className="h-4 w-4 text-muted-foreground" />
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          Subject-wise Breakdown
         </h3>
-        <PerformanceStatsRow />
       </div>
-
-      {/* Subject-wise Charts Section */}
-      <div data-section="subject-breakdown">
-        <div className="flex items-center gap-2 mb-3">
-          <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Subject-wise Breakdown
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subjectBreakdowns.map((breakdown) => (
-            <SubjectBreakdownChart 
-              key={breakdown.subjectId} 
-              breakdown={breakdown}
-              tabIndex={subjectTabIndex[breakdown.subjectId] ?? 0}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {subjectBreakdowns.map((breakdown) => (
+          <SubjectBreakdownChart 
+            key={breakdown.subjectId} 
+            breakdown={breakdown}
+            tabIndex={subjectTabIndex[breakdown.subjectId] ?? 0}
+          />
+        ))}
       </div>
     </div>
   );
