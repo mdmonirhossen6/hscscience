@@ -3,6 +3,23 @@ import { SubjectBreakdownChart } from "./SubjectBreakdownChart";
 import { StrengthWeaknessCard } from "./StrengthWeaknessCard";
 import { Loader2, BarChart3 } from "lucide-react";
 
+// Map subject IDs to tracker tab indices
+const subjectTabIndex: Record<string, number> = {
+  "physics": 0,
+  "physics2nd": 1,
+  "chemistry": 2,
+  "chemistry2nd": 3,
+  "highermath": 4,
+  "highermath2nd": 5,
+  "biology": 6,
+  "biology2nd": 7,
+  "ict": 8,
+  "english1st": 9,
+  "english2nd": 10,
+  "bangla1st": 11,
+  "bangla2nd": 12,
+};
+
 export const SubjectAnalyticsSection = () => {
   const { subjectBreakdowns, strongestAreas, weakestAreas, loading } = useSubjectAnalytics();
 
@@ -47,7 +64,8 @@ export const SubjectAnalyticsSection = () => {
           {subjectBreakdowns.map((breakdown) => (
             <SubjectBreakdownChart 
               key={breakdown.subjectId} 
-              breakdown={breakdown} 
+              breakdown={breakdown}
+              tabIndex={subjectTabIndex[breakdown.subjectId] ?? 0}
             />
           ))}
         </div>
