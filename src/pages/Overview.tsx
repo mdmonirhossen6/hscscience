@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, TrendingUp, BookOpen, CheckCircle2, Clock, Activity } from "lucide-react";
+import { Loader2, TrendingUp, BookOpen, CheckCircle2, Clock, Activity, FileText, ClipboardList, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Progress } from "@/components/ui/progress";
 import { SubjectAnalyticsSection, PerformanceStatsRow } from "@/components/overview/SubjectAnalyticsSection";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import { physicsData } from "@/data/physicsData";
@@ -190,99 +191,135 @@ export default function Overview() {
             </div>
 
             {/* Subject-wise Breakdown Charts - 2nd from Top */}
-            <div className="mb-6">
-              <SubjectAnalyticsSection />
-            </div>
+            <Card className="border-border/50 bg-card/60 mb-6">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground">
+                      Subject-wise Breakdown
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Activity-level progress breakdown for each subject with interactive charts.
+                    </p>
+                  </div>
+                </div>
+                <SubjectAnalyticsSection />
+              </CardContent>
+            </Card>
 
             {/* Overall Progress Card */}
-            <div className="bg-gradient-to-br from-primary/20 via-primary/10 to-background rounded-2xl p-6 mb-6 border border-primary/20">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/20 rounded-xl">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+            <Card className="border-border/50 bg-card/60 mb-6">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-xl bg-secondary text-secondary-foreground">
+                    <ClipboardList className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground">
+                      Overall Progress
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Combined progress across all subjects with activity and chapter counts.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">Overall Progress</h2>
-                  <p className="text-sm text-muted-foreground">Across all subjects</p>
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-3xl font-bold text-foreground">
-                    {overallStats.overallPercent}%
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {overallStats.completedActivities} / {overallStats.totalActivities} activities
-                  </span>
-                </div>
-                <Progress value={overallStats.overallPercent} className="h-3" />
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="bg-background/60 rounded-xl p-3 text-center">
-                  <BookOpen className="h-5 w-5 mx-auto mb-1 text-primary" />
-                  <p className="text-lg font-semibold text-foreground">{overallStats.totalSubjects}</p>
-                  <p className="text-xs text-muted-foreground">Subjects</p>
-                </div>
-                <div className="bg-background/60 rounded-xl p-3 text-center">
-                  <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-green-500" />
-                  <p className="text-lg font-semibold text-foreground">{overallStats.completedChapters}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </div>
-                <div className="bg-background/60 rounded-xl p-3 text-center">
-                  <Clock className="h-5 w-5 mx-auto mb-1 text-amber-500" />
-                  <p className="text-lg font-semibold text-foreground">
-                    {overallStats.totalChapters - overallStats.completedChapters}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Remaining</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Subject Progress List */}
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-              Subject Breakdown
-            </h3>
-            <div className="space-y-3">
-              {subjectProgress.map((subject, index) => (
-                <button
-                  key={subject.id}
-                  onClick={() => handleSubjectClick(index)}
-                  className="w-full bg-card/60 hover:bg-card/80 rounded-xl p-4 transition-all text-left group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: subject.color }}
-                      />
-                      <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                        {subject.label}
-                      </span>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">
-                      {subject.progressPercent}%
+                
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-3xl font-bold text-foreground">
+                      {overallStats.overallPercent}%
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {overallStats.completedActivities} / {overallStats.totalActivities} activities
                     </span>
                   </div>
-                  
-                  <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
-                      style={{ 
-                        width: `${subject.progressPercent}%`,
-                        backgroundColor: subject.color,
-                      }}
-                    />
+                  <Progress value={overallStats.overallPercent} className="h-3" />
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    <div className="bg-muted/50 rounded-xl p-3 text-center">
+                      <BookOpen className="h-5 w-5 mx-auto mb-1 text-primary" />
+                      <p className="text-lg font-semibold text-foreground">{overallStats.totalSubjects}</p>
+                      <p className="text-xs text-muted-foreground">Subjects</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-xl p-3 text-center">
+                      <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-green-500" />
+                      <p className="text-lg font-semibold text-foreground">{overallStats.completedChapters}</p>
+                      <p className="text-xs text-muted-foreground">Completed</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-xl p-3 text-center">
+                      <Clock className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+                      <p className="text-lg font-semibold text-foreground">
+                        {overallStats.totalChapters - overallStats.completedChapters}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Remaining</p>
+                    </div>
                   </div>
-                  
-                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    <span>{subject.completedChapters}/{subject.totalChapters} chapters</span>
-                    <span>{subject.completedActivities}/{subject.totalActivities} activities</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Subject Progress List */}
+            <Card className="border-border/50 bg-card/60">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="p-3 rounded-xl bg-accent text-accent-foreground">
+                    <Calendar className="h-6 w-6" />
                   </div>
-                </button>
-              ))}
-            </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground">
+                      Subject Breakdown
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Progress breakdown for each subject with chapter and activity counts.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  {subjectProgress.map((subject, index) => (
+                    <button
+                      key={subject.id}
+                      onClick={() => handleSubjectClick(index)}
+                      className="w-full bg-muted/30 hover:bg-muted/50 rounded-xl p-4 transition-all text-left group"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: subject.color }}
+                          />
+                          <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                            {subject.label}
+                          </span>
+                        </div>
+                        <span className="text-sm font-semibold text-foreground">
+                          {subject.progressPercent}%
+                        </span>
+                      </div>
+                      
+                      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="absolute left-0 top-0 h-full rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${subject.progressPercent}%`,
+                            backgroundColor: subject.color,
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                        <span>{subject.completedChapters}/{subject.totalChapters} chapters</span>
+                        <span>{subject.completedActivities}/{subject.totalActivities} activities</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </>
         )}
       </main>
