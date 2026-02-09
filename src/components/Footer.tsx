@@ -1,0 +1,17 @@
+import { Link } from "react-router-dom";
+
+export function Footer() {
+  return (
+    <footer className="hidden md:block w-full border-t border-border/50 bg-card/80 mt-auto">
+      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-sm text-muted-foreground">
+        <span>© 2025 Trackinger. All rights reserved.</span>
+        <nav className="flex items-center gap-6">
+          <Link to="/about" className="hover:text-foreground transition-colors underline">About</Link>
+          <a href="https://t.me/trackingerapp" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline">How to Use</a>
+          <Link to="/about" className="hover:text-foreground transition-colors underline">Privacy Policy</Link>
+          <a href="mailto:md01610988605@gmail.com" className="hover:text-foreground transition-colors underline">Contact</a>
+        </nav>
+      </div>
+    </footer>
+  );
+}
