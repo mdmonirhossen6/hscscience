@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { MobileHeader } from "@/components/MobileHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { DesktopSidebar } from "@/components/DesktopSidebar";
+import { Footer } from "@/components/Footer";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -28,6 +29,9 @@ export function AppLayout({ children, title = "Study Progress", showMobileHeader
         <div className="flex-1 w-full max-w-full">
           {children}
         </div>
+
+        {/* Desktop Footer */}
+        <Footer />
 
         {/* Mobile Bottom Navigation */}
         <BottomNav />
