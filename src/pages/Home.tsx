@@ -70,7 +70,7 @@ export default function Home() {
         }} />
         </div>
 
-        <main className="px-4 py-6 max-w-4xl mx-auto">
+        <main className="max-w-4xl mx-0 px-[14px] py-[35px] border">
           {/* Desktop Download Buttons */}
           {user && <div className="hidden md:flex justify-end gap-2 mb-4">
               <Button variant="outline" size="sm" onClick={handleDownloadOverallPDF} className="gap-2">
