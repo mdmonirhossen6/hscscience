@@ -96,7 +96,7 @@ export default function Home() {
 
           {/* Subject Grid - Horizontal scroll on mobile, grid on desktop */}
           <div className="mb-6">
-            <h2 className="font-semibold text-foreground mb-3 text-lg font-serif text-center">
+            <h2 className="font-semibold text-foreground mb-3 text-lg font-serif text-left">
               Subject Progress
             </h2>
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide scroll-smooth-touch touch-pan-x overscroll-x-contain pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 lg:grid-cols-5 md:gap-3 md:overflow-visible">
