@@ -227,8 +227,14 @@ export function AIChatBox() {
     mainGoal: "",
   });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll to bottom helper
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   // Load preferences from localStorage on mount
   useEffect(() => {
@@ -462,10 +468,8 @@ export function AIChatBox() {
   };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   // Handle file upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -546,6 +550,7 @@ export function AIChatBox() {
           }
           return [...prev, { role: "assistant", content: assistantContent }];
         });
+        scrollToBottom();
       };
 
       streamChat({
@@ -606,6 +611,7 @@ export function AIChatBox() {
         }
         return [...prev, { role: "assistant", content: assistantContent }];
       });
+      scrollToBottom();
     };
 
     // Prepare messages for API - include attachment URLs for vision
@@ -703,7 +709,7 @@ export function AIChatBox() {
                 <p className="text-xs text-muted-foreground mt-1">ভালো সাজেশনের জন্য এই প্রশ্নগুলোর উত্তর দাও</p>
               </div>
               
-              <ScrollArea className="max-h-[350px] scrollbar-purple">
+              <ScrollArea className="max-h-[300px] overflow-y-auto scrollbar-purple">
                 <div className="p-4 space-y-4">
                   {/* Current Class */}
                   <div className="space-y-2">
@@ -938,6 +944,7 @@ export function AIChatBox() {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </ScrollArea>
