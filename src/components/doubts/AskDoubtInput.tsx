@@ -11,7 +11,7 @@ import { ALL_SUBJECTS } from "@/hooks/useProgressSnapshot";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-const SUBJECT_OPTIONS = ALL_SUBJECTS.map(s => ({ id: s.data.id, name: s.displayName }));
+const SUBJECT_OPTIONS = ALL_SUBJECTS.map(s => ({ id: s.data.id, name: s.displayName, chapters: s.data.chapters.map(c => c.name) }));
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 interface AskDoubtInputProps {
@@ -24,6 +24,7 @@ export function AskDoubtInput({ onPost }: AskDoubtInputProps) {
   const [open, setOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [chapter, setChapter] = useState("");
+  const selectedSubjectChapters = SUBJECT_OPTIONS.find(s => s.id === subject)?.chapters || [];
   const [question, setQuestion] = useState("");
   const [posting, setPosting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -129,7 +130,7 @@ export function AskDoubtInput({ onPost }: AskDoubtInputProps) {
         </DialogHeader>
 
         <div className="p-4 space-y-3">
-          <Select value={subject} onValueChange={setSubject}>
+          <Select value={subject} onValueChange={v => { setSubject(v); setChapter(""); }}>
             <SelectTrigger className="bg-muted/30 border-border/40">
               <SelectValue placeholder="Select Subject *" />
             </SelectTrigger>
@@ -140,13 +141,16 @@ export function AskDoubtInput({ onPost }: AskDoubtInputProps) {
             </SelectContent>
           </Select>
 
-          <input
-            type="text"
-            placeholder="Chapter (optional)"
-            value={chapter}
-            onChange={e => setChapter(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-border/40 bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
+          <Select value={chapter} onValueChange={setChapter} disabled={!subject}>
+            <SelectTrigger className="bg-muted/30 border-border/40">
+              <SelectValue placeholder={subject ? "Select Chapter (optional)" : "Select subject first"} />
+            </SelectTrigger>
+            <SelectContent className="max-h-[200px]">
+              {selectedSubjectChapters.map(ch => (
+                <SelectItem key={ch} value={ch} className="text-xs">{ch}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Textarea
             placeholder="Describe your doubt... *"
