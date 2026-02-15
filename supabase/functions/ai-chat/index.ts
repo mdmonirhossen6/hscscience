@@ -28,7 +28,7 @@ async function fetchWithRetry(
 
     if (response.status === 429) {
       const errorText = await response.text();
-      console.log(`Groq 429 response (attempt ${attempt + 1}):`, errorText);
+      console.log(`OpenAI 429 response (attempt ${attempt + 1}):`, errorText);
 
       if (attempt < retries) {
         const retryAfter = response.headers.get("Retry-After");
@@ -63,9 +63,9 @@ serve(async (req) => {
     
     console.log("Received chat request with", messages?.length, "messages");
     
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) {
-      console.error("GROQ_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is not configured");
       throw new Error("AI service is not configured");
     }
 
@@ -218,14 +218,14 @@ ${userDataContext}`;
     
     console.log("Sending", truncatedMessages.length, "messages to Groq");
 
-    const response = await fetchWithRetry("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           ...truncatedMessages,
@@ -235,7 +235,7 @@ ${userDataContext}`;
     });
 
     if (!response.ok) {
-      console.error("Groq API error:", response.status);
+      console.error("OpenAI API error:", response.status);
       
       if (response.status === 429) {
         return new Response(
@@ -250,7 +250,7 @@ ${userDataContext}`;
       if (response.status === 401 || response.status === 403) {
         return new Response(
           JSON.stringify({ 
-            error: "Groq API key is invalid or expired.",
+            error: "OpenAI API key is invalid or expired.",
             type: "auth"
           }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -258,7 +258,7 @@ ${userDataContext}`;
       }
 
       const errorText = await response.text();
-      console.error("Groq API error response:", errorText);
+      console.error("OpenAI API error response:", errorText);
       return new Response(
         JSON.stringify({ error: "AI service error" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
